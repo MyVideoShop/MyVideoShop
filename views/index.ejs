@@ -16,5 +16,29 @@
     <h2>Willkommen auf der Startseite!</h2>
     <p>Hier werden bald Videos angezeigt...</p>
   </main>
+<!-- Login Button oben rechts -->
+<button id="loginButton" class="corner-btn">Creator Login</button>
+
+<!-- Login Modal -->
+<div id="loginModal" class="modal hidden">
+  <div class="modal-content">
+    <h2>Creator/Admin Login</h2>
+    <form id="loginForm">
+      <label for="name">Name*</label>
+      <input type="text" name="name" required />
+
+      <label for="email">E-Mail (nur für Bewerbung)</label>
+      <input type="email" name="email" />
+
+      <label for="password">Passwort*</label>
+      <input type="password" name="password" required />
+
+      <div class="modal-buttons">
+        <button type="submit" name="action" value="apply">Bewerben</button>
+        <button type="submit" name="action" value="login">Einloggen</button>
+      </div>
+    </form>
+  </div>
+</div>
 </body>
 </html>
