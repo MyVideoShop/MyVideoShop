@@ -16,26 +16,30 @@
     <h2>Willkommen auf der Startseite!</h2>
     <p>Hier werden bald Videos angezeigt...</p>
   </main>
-<!-- Creator Login Button -->
-<button id="loginButton" class="corner-btn">Creator Login</button>
 
-<!-- Login Modal -->
-<div id="loginModal" class="modal hidden">
-  <div class="modal-content">
-    <h2>Creator/Admin Login</h2>
-    <form id="loginForm">
-      <input type="text" name="name" placeholder="Name*" required />
-      <input type="email" name="email" placeholder="E-Mail (nur für Bewerbung)" />
-      <input type="password" name="password" placeholder="Passwort*" required />
+  <!-- Creator Login Button -->
+  <button id="loginButton" class="corner-btn">Creator Login</button>
 
-      <div id="formMessage" class="form-message"></div>
+  <!-- Login Modal -->
+  <div id="loginModal" class="modal hidden">
+    <div class="modal-content">
+      <h2>Creator/Admin Login</h2>
+      <form id="loginForm">
+        <input type="text" name="name" placeholder="Name*" required />
+        <input type="email" name="email" placeholder="E-Mail (nur für Bewerbung)" />
+        <input type="password" name="password" placeholder="Passwort*" required />
 
-      <div class="modal-buttons">
-        <button type="submit" name="action" value="apply">Bewerben</button>
-        <button type="submit" name="action" value="login">Einloggen</button>
-      </div>
-    </form>
+        <div id="formMessage" class="form-message"></div>
+
+        <div class="modal-buttons">
+          <button type="submit" name="action" value="apply">Bewerben</button>
+          <button type="submit" name="action" value="login">Einloggen</button>
+        </div>
+      </form>
+    </div>
   </div>
-</div>
+
+  <!-- Script einbinden -->
+  <script src="/js/script.js"></script>
 </body>
 </html>
