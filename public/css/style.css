@@ -92,34 +92,34 @@ main {
   text-align: center;
 }
 
-/* Neues Admin Dashboard Layout */
+/* Admin Dashboard */
 .dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1.5rem;
   padding: 2rem;
 }
 
 .dashboard-box {
-  background-color: #1f1f1f;
-  border-radius: 10px;
-  padding: 1.5rem;
+  background-color: #1e1e1e;
+  border-radius: 12px;
+  padding: 2rem 1rem;
   text-align: center;
-  color: white;
   text-decoration: none;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-  transition: background-color 0.2s;
+  color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4); /* 3D-Effekt */
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .dashboard-box:hover {
-  background-color: #333;
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6);
+  background-color: #2a2a2a;
 }
 
-.dashboard-title {
-  color: white;
+.dashboard-box-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: white; /* Titel bleibt weiß */
   text-decoration: none;
-}
-
-.dashboard-title:hover {
-  text-decoration: underline;
 }
