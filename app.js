@@ -10,8 +10,9 @@ app.set('views', path.join(__dirname, 'views'));
 
 app.use('/', authRoutes);
 
+// Startseite mit shopName-Variable rendern
 app.get('/', (req, res) => {
-  res.render('index');
+  res.render('index', { shopName: 'ShopMyVideos' });
 });
 
 app.get('/creator', (req, res) => {
