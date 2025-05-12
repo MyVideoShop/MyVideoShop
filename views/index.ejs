@@ -20,6 +20,22 @@
   <!-- Creator Login Button -->
   <button id="loginButton" class="corner-btn">Creator Login</button>
 
+<!-- Button -->
+<button onclick="document.getElementById('supportModal').style.display='block'">Support kontaktieren</button>
+
+<!-- Modal -->
+<div class="modal" id="supportModal">
+  <div class="modal-content">
+    <form action="/submit-support" method="POST">
+      <h2>Supportnachricht</h2>
+      <input type="text" name="title" placeholder="Titel" required><br>
+      <textarea name="description" placeholder="Beschreibung (10–200 Wörter)" minlength="10" maxlength="200" required></textarea><br>
+      <button type="submit">Senden</button>
+      <button type="button" onclick="document.getElementById('supportModal').style.display='none'">Schließen</button>
+    </form>
+  </div>
+</div>
+
   <!-- Login Modal -->
   <div id="loginModal" class="modal hidden">
     <div class="modal-content">
