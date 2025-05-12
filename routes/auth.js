@@ -11,7 +11,7 @@ router.post('/auth', (req, res) => {
     if (!email) {
       return res.json({ success: false, message: 'Zum Bewerben wird eine E-Mail benötigt.' });
     }
-    console.log(Bewerbung: ${name}, ${email});
+    console.log(`Bewerbung: ${name}, ${email}`);
     return res.json({ success: true, message: 'Bewerbung gesendet!' });
   }
 
