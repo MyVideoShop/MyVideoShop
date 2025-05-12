@@ -1,33 +1,30 @@
-body.dark {
+/* Allgemeine Stile */
+body {
+  font-family: Arial, sans-serif;
   background-color: #121212;
-  color: #eee;
-  font-family: sans-serif;
+  color: #ffffff;
   margin: 0;
   padding: 0;
 }
 
+/* Header */
 header {
-  display: flex;
-  align-items: center;
-  padding: 1rem;
   background-color: #1f1f1f;
-  border-bottom: 1px solid #333;
+  padding: 15px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.logo {
-  height: 40px;
-  margin-right: 1rem;
+header h1 {
+  margin: 0;
+  font-size: 1.8em;
+  color: #f0f0f0;
+  cursor: pointer;
 }
 
-main {
-  padding: 2rem;
-}
-
-.corner-btn {
-  position: absolute;
-  top: 10px;
-  right: 20px;
-  background-color: #555;
+header button {
+  background-color: #3f51b5;
   color: white;
   border: none;
   padding: 10px 16px;
@@ -35,91 +32,166 @@ main {
   cursor: pointer;
 }
 
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.8);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 99;
+header button:hover {
+  background-color: #5c6bc0;
 }
 
-.modal.hidden {
+/* Modal-Layout */
+.modal {
   display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.6);
 }
 
 .modal-content {
-  background-color: #1c1c1c;
-  padding: 20px;
-  border-radius: 10px;
+  background-color: #1e1e1e;
+  margin: 5% auto;
+  padding: 30px;
+  border: 1px solid #888;
   width: 90%;
   max-width: 400px;
-  color: white;
+  border-radius: 10px;
+  box-shadow: 0 0 10px #000;
 }
 
-.modal-content input {
-  width: 100%;
+.modal-content h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #ffffff;
+}
+
+.modal-content input[type="text"],
+.modal-content input[type="password"] {
+  width: 95%;
   padding: 12px;
-  margin: 10px 0;
-  background-color: #333;
-  border: none;
-  border-radius: 5px;
-  color: white;
+  margin: 10px auto;
+  display: block;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #2b2b2b;
+  color: #fff;
 }
 
-.modal-buttons {
-  display: flex;
-  justify-content: space-between;
+.modal-content label {
+  margin-left: 2.5%;
+  display: block;
+  margin-top: 10px;
+  font-size: 0.95em;
 }
 
-.modal-buttons button {
-  width: 48%;
-  padding: 10px;
-  background-color: #444;
+.modal-content input[type="radio"] {
+  margin-left: 10px;
+  transform: scale(1.1);
+}
+
+.modal-content input[type="submit"] {
+  background-color: #3f51b5;
   color: white;
   border: none;
+  padding: 12px 20px;
+  margin: 20px auto 0;
+  display: block;
   border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.modal-content input[type="submit"]:hover {
+  background-color: #5c6bc0;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 26px;
+  font-weight: bold;
   cursor: pointer;
 }
 
-.form-message {
-  color: red;
-  margin-bottom: 10px;
-  text-align: center;
+.close:hover,
+.close:focus {
+  color: #fff;
+  text-decoration: none;
 }
 
-/* Admin Dashboard */
-.dashboard-grid {
+/* Admin-Dashboard */
+.admin-dashboard {
+  padding: 40px 5%;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.5rem;
-  padding: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
 }
 
-.dashboard-box {
-  background-color: #1e1e1e;
-  border-radius: 12px;
-  padding: 2rem 1rem;
-  text-align: center;
-  text-decoration: none;
-  color: white;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4); /* 3D-Effekt */
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.dashboard-box:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6);
+.admin-box {
   background-color: #2a2a2a;
+  padding: 30px;
+  border-radius: 10px;
+  text-align: center;
+  transition: background-color 0.3s;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
 
-.dashboard-box-title {
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: white; /* Titel bleibt weiß */
+.admin-box:hover {
+  background-color: #3a3a3a;
+}
+
+.admin-box h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1.3em;
+}
+
+a {
+  color: inherit;
   text-decoration: none;
+}
+
+/* Admin-Stats Seite */
+.stats-section {
+  padding: 40px 5%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.stats-box {
+  background-color: #2a2a2a;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.stats-box h3 {
+  margin-top: 0;
+  color: #ffffff;
+}
+
+.stats-box p {
+  margin: 10px 0;
+}
+
+.stats-box ul {
+  list-style: none;
+  padding: 0;
+}
+
+.stats-box li {
+  margin-bottom: 10px;
+}
+
+/* Creator-Seite Platzhalter */
+.creator-content {
+  padding: 40px 5%;
+  text-align: center;
+}
+
+.creator-content h2 {
+  font-size: 2em;
+  color: #f0f0f0;
 }
