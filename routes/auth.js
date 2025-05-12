@@ -23,7 +23,7 @@ router.post('/auth', (req, res) => {
 
     const creator = creators.find(u => u.name === name && u.password === password);
     if (creator) {
-      return res.json({ success: true, redirect: /creator/${encodeURIComponent(name)}, message: 'Creator Login erfolgreich!' });
+      return res.json({ success: true, redirect: `/creator/${encodeURIComponent(name)}`, message: 'Creator Login erfolgreich!' });
     }
 
     return res.json({ success: false, message: 'Ungültige Zugangsdaten.' });
