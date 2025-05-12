@@ -58,7 +58,7 @@
   <main class="stats-section">
     <!-- Einnahmen-Box -->
     <div class="stat-box">
-      <h2>Gesamteinnahmen: <span id="revenueAmount">1.234,56 €</span></h2>
+      <h2>Gesamteinnahmen: <span id="revenueAmount"><%= revenue.total.toFixed(2) %> €</span></h2>
       <div class="toggle-buttons">
         <button onclick="changeRevenue('day')">Heute</button>
         <button onclick="changeRevenue('month')">Diesen Monat</button>
@@ -75,19 +75,19 @@
         <button onclick="changeCreators('total')">Insgesamt</button>
       </div>
       <div class="creator-list" id="creatorList">
-        <div class="dashboard-box">Creator A – 456,78 €</div>
-        <div class="dashboard-box">Creator B – 321,00 €</div>
-        <div class="dashboard-box">Creator C – 289,50 €</div>
+        <% creators.total.forEach(c => { %>
+          <div class="dashboard-box"><%= c.name %> – <%= c.amount.toFixed(2) %> €</div>
+        <% }) %>
       </div>
     </div>
 
     <!-- Top-Kategorien -->
     <h2 class="section-title">Top 5 Kategorien</h2>
     <div class="dashboard-grid">
-      <% ['Fitness', 'Gaming', 'Kochen', 'DIY', 'Tiere'].forEach((cat, i) => { %>
+      <% Object.entries(categories).slice(0, 5).forEach(([cat, count]) => { %>
         <div class="dashboard-box">
           <div class="dashboard-box-title"><%= cat %></div>
-          <p><%= 50 - i * 7 %> Käufe</p>
+          <p><%= count %> Käufe</p>
         </div>
       <% }) %>
     </div>
@@ -97,32 +97,33 @@
     <div class="dashboard-grid">
       <div class="dashboard-box">
         <div class="dashboard-box-title">Aktuelle Besucher</div>
-        <p>15 gerade online</p>
+        <p><%= visitors.online %> gerade online</p>
       </div>
       <div class="dashboard-box">
         <div class="dashboard-box-title">Seitenaufrufe gesamt</div>
-        <p>3.278</p>
+        <p><%= visitors.total %></p>
       </div>
     </div>
   </main>
 
   <script>
+    const revenueData = {
+      day: <%= revenue.day.toFixed(2) %>,
+      month: <%= revenue.month.toFixed(2) %>,
+      total: <%= revenue.total.toFixed(2) %>
+    };
+
+    const creatorData = {
+      day: <%- JSON.stringify(creators.day) %>,
+      month: <%- JSON.stringify(creators.month) %>,
+      total: <%- JSON.stringify(creators.total) %>
+    };
+
     function changeRevenue(period) {
-      const data = {
-        day: '123,45 €',
-        month: '789,01 €',
-        total: '1.234,56 €'
-      };
-      document.getElementById('revenueAmount').textContent = data[period];
+      document.getElementById('revenueAmount').textContent = revenueData[period].toFixed(2) + ' €';
     }
 
     function changeCreators(period) {
-      const creatorData = {
-        day: ['X – 120,00 €', 'Y – 110,00 €', 'Z – 100,00 €'],
-        month: ['M – 600,00 €', 'N – 550,00 €', 'O – 500,00 €'],
-        total: ['A – 456,78 €', 'B – 321,00 €', 'C – 289,50 €']
-      };
-
       document.getElementById('creatorPeriod').textContent = {
         day: 'Heute',
         month: 'Diesen Monat',
@@ -134,7 +135,7 @@
       creatorData[period].forEach(entry => {
         const div = document.createElement('div');
         div.className = 'dashboard-box';
-        div.textContent = entry;
+        div.textContent = `${entry.name} – ${entry.amount.toFixed(2)} €`;
         list.appendChild(div);
       });
     }
