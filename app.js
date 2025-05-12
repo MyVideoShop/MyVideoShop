@@ -1,55 +1,47 @@
 const express = require('express');
-const app = express();
 const path = require('path');
+const app = express();
 const authRoutes = require('./routes/auth');
-// Admin-Platzhalterseiten
-const adminPages = [
-  'stats',
-  'video-hochladen',
-  'videos-verwalten',
-  'gutscheine-erstellen',
-  'gutscheine-verwalten',
-  'admins-erstellen',
-  'admins-verwalten',
-  'creators-erstellen',
-  'creators-verwalten',
-  'support-nachrichten'
-];
 
-adminPages.forEach(page => {
-  app.get(`/admin/${page}`, (req, res) => {
-    res.render('admin-placeholder', { title: page.replace(/-/g, ' ') });
-  });
-});
-
-app.use(express.static('public'));
-app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 app.use('/', authRoutes);
 
 app.get('/', (req, res) => {
-  res.render('index', { shopName: 'ShopMyVideos' });
+  res.render('index');
+});
+
+app.get('/creator', (req, res) => {
+  res.render('creator');
 });
 
 app.get('/admin', (req, res) => {
   res.render('admin');
 });
 
-app.get('/creator/:name', (req, res) => {
-  const name = req.params.name;
-  res.render('creator', { name });
+const adminPages = [
+  { route: 'upload', title: 'Video hochladen' },
+  { route: 'vouchers', title: 'Gutscheine erstellen' },
+  { route: 'manage-creators', title: 'Creator verwalten' },
+  { route: 'manage-categories', title: 'Kategorien verwalten' },
+  { route: 'settings', title: 'Einstellungen' },
+];
+
+adminPages.forEach(page => {
+  app.get(`/admin/${page.route}`, (req, res) => {
+    res.render('admin-placeholder', { title: page.title });
+  });
 });
 
-app.get('/admin/:section', (req, res) => {
-  const section = req.params.section;
-  res.send(`<h1 style="color:white; background:#121212; padding:2rem;">Placeholder: ${section}</h1><a href="/admin" style="color:cyan;">Zurück zum Dashboard</a>`);
-});
-
-app.get('/admin-stats', (req, res) => {
+// Admin-Stats speziell laden
+app.get('/admin/stats', (req, res) => {
   res.render('admin-stats');
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server läuft auf Port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Server läuft auf Port ${PORT}`);
+});
