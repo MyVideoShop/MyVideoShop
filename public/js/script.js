@@ -4,18 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const loginForm = document.getElementById('loginForm');
   const formMessage = document.getElementById('formMessage');
 
-  let currentAction = ''; // Merkt sich, welcher Button gedrückt wurde
-
   loginButton.addEventListener('click', () => {
     loginModal.classList.remove('hidden');
-  });
-
-  // Buttons explizit abfangen
-  const buttons = loginForm.querySelectorAll('button[type="submit"]');
-  buttons.forEach(button => {
-    button.addEventListener('click', (e) => {
-      currentAction = e.target.value;
-    });
   });
 
   loginForm.addEventListener('submit', async (e) => {
@@ -23,10 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const formData = new FormData(loginForm);
     const data = Object.fromEntries(formData.entries());
 
-    // Explizit Action setzen
-    data.action = currentAction;
-
-    formMessage.textContent = '';
+    formMessage.textContent = ''; // Reset message
 
     if (data.action === 'apply' && !data.email) {
       formMessage.textContent = 'Zum Bewerben wird eine E-Mail benötigt.';
