@@ -2,18 +2,26 @@ const express = require('express');
 const session = require('express-session');
 const fs = require('fs');
 const path = require('path');
-
 const app = express();
-
 const authRoutes = require('./routes/auth');
 const adminStatsRoute = require('./routes/admin/stats');
-
 const statsFile = path.join(__dirname, 'data', 'visits.json');
 
 // Stelle sicher, dass Datei existiert
 if (!fs.existsSync(statsFile)) {
   fs.writeFileSync(statsFile, JSON.stringify({ total: 0, online: 0 }));
 }
+
+const supportRoutes = require('./routes/support');
+const SupportMessage = require('./models/SupportMessage');
+
+app.use('/support', supportRoutes);
+
+// Supportnachrichten älter als 7 Tage automatisch löschen
+setInterval(async () => {
+  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  await SupportMessage.deleteMany({ createdAt: { $lt: weekAgo } });
+}, 6 * 60 * 60 * 1000); // alle 6 Stunden prüfen
 
 // Session-Konfiguration
 app.use(session({
