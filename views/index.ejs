@@ -2,43 +2,22 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title><%= shopName %> – Startseite</title>
-  <link rel="stylesheet" href="/css/style.css" />
+  <title>Besucherzähler</title>
+  <link rel="stylesheet" href="/style.css" />
 </head>
-<body class="dark">
-  <header>
-    <img src="/logo.avif" alt="Logo" class="logo" />
-    <h1><%= shopName %></h1>
-  </header>
-
-  <main>
-    <h2>Willkommen auf der Startseite!</h2>
-    <p>Hier werden bald Videos angezeigt...</p>
-  </main>
-
-  <!-- Creator Login Button -->
-  <button id="loginButton" class="corner-btn">Creator Login</button>
-
-  <!-- Login Modal -->
-  <div id="loginModal" class="modal hidden">
-    <div class="modal-content">
-      <h2>Creator/Admin Login</h2>
-      <form id="loginForm">
-        <input type="text" name="name" placeholder="Name*" required />
-        <input type="email" name="email" placeholder="E-Mail (nur für Bewerbung)" />
-        <input type="password" name="password" placeholder="Passwort*" required />
-
-        <div id="formMessage" class="form-message"></div>
-
-        <div class="modal-buttons">
-          <button type="submit" name="action" value="apply">Bewerben</button>
-          <button type="submit" name="action" value="login">Einloggen</button>
-        </div>
-      </form>
-    </div>
+<body>
+  <div class="counter-box">
+    <h1>Willkommen!</h1>
+    <p>Besuche insgesamt: <strong><%= totalVisitors %></strong></p>
+    <p>Aktuell online: <strong id="online-users">0</strong></p>
   </div>
 
-  <script src="/js/script.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    socket.on("updateOnlineUsers", (count) => {
+      document.getElementById("online-users").textContent = count;
+    });
+  </script>
 </body>
 </html>
