@@ -92,22 +92,34 @@ main {
   text-align: center;
 }
 
-.admin-menu {
-  list-style: none;
-  padding: 0;
-  margin-top: 2rem;
+/* Neues Admin Dashboard Layout */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  padding: 2rem;
 }
 
-.admin-menu li {
-  margin: 10px 0;
-}
-
-.admin-menu a {
-  color: #00bfff;
+.dashboard-box {
+  background-color: #1f1f1f;
+  border-radius: 10px;
+  padding: 1.5rem;
+  text-align: center;
+  color: white;
   text-decoration: none;
-  font-size: 1.2rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.2s;
 }
 
-.admin-menu a:hover {
+.dashboard-box:hover {
+  background-color: #333;
+}
+
+.dashboard-title {
+  color: white;
+  text-decoration: none;
+}
+
+.dashboard-title:hover {
   text-decoration: underline;
 }
