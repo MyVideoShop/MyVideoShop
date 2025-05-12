@@ -111,3 +111,34 @@ main {
 .admin-menu a:hover {
   text-decoration: underline;
 }
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  padding: 2rem;
+}
+
+.dashboard-box {
+  background-color: #1f1f1f;
+  border-radius: 10px;
+  padding: 1.5rem;
+  text-align: center;
+  color: white;
+  text-decoration: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.2s;
+}
+
+.dashboard-box:hover {
+  background-color: #333;
+}
+
+.dashboard-title {
+  color: white;
+  text-decoration: none;
+}
+
+.dashboard-title:hover {
+  text-decoration: underline;
+}
