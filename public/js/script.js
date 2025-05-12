@@ -5,26 +5,35 @@ document.addEventListener("DOMContentLoaded", function () {
   const loginTypeInputs = document.querySelectorAll('input[name="loginType"]');
   const loginTitle = document.getElementById("loginTitle");
 
+  // Öffnen
   loginBtn.addEventListener("click", () => {
     loginModal.style.display = "block";
+    setTimeout(() => loginModal.classList.add("show"), 10);
   });
 
+  // Schließen über X
   closeModal.addEventListener("click", () => {
-    loginModal.style.display = "none";
+    loginModal.classList.remove("show");
+    setTimeout(() => loginModal.style.display = "none", 200);
   });
 
+  // Schließen bei Klick außerhalb
   window.addEventListener("click", (event) => {
     if (event.target === loginModal) {
-      loginModal.style.display = "none";
+      loginModal.classList.remove("show");
+      setTimeout(() => loginModal.style.display = "none", 200);
     }
   });
 
+  // ESC zum Schließen
   window.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
-      loginModal.style.display = "none";
+      loginModal.classList.remove("show");
+      setTimeout(() => loginModal.style.display = "none", 200);
     }
   });
 
+  // Titel dynamisch ändern
   loginTypeInputs.forEach((input) => {
     input.addEventListener("change", () => {
       loginTitle.textContent = input.value === "login" ? "Login" : "Als Creator bewerben";
