@@ -1,8 +1,26 @@
 const express = require('express');
 const app = express();
 const path = require('path');
-
 const authRoutes = require('./routes/auth');
+// Admin-Platzhalterseiten
+const adminPages = [
+  'stats',
+  'video-hochladen',
+  'videos-verwalten',
+  'gutscheine-erstellen',
+  'gutscheine-verwalten',
+  'admins-erstellen',
+  'admins-verwalten',
+  'creators-erstellen',
+  'creators-verwalten',
+  'support-nachrichten'
+];
+
+adminPages.forEach(page => {
+  app.get(`/admin/${page}`, (req, res) => {
+    res.render('admin-placeholder', { title: page.replace(/-/g, ' ') });
+  });
+});
 
 app.use(express.static('public'));
 app.use(express.json());
