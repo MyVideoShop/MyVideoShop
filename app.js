@@ -1,8 +1,9 @@
 const express = require('express');
 const app = express();
 const path = require('path');
-
 const authRoutes = require('./routes/auth');
+const adminStatsRoute = require('./routes/admin/stats');
+app.use('/admin/stats', adminStatsRoute);
 
 app.use(express.static('public'));
 app.use(express.json());
