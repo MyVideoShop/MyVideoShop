@@ -107,38 +107,45 @@
   </main>
 
   <script>
-    const revenueData = {
-      day: <%= revenue.day.toFixed(2) %>,
-      month: <%= revenue.month.toFixed(2) %>,
-      total: <%= revenue.total.toFixed(2) %>
+  const revenueData = {
+    day: <%= revenue.day.toFixed(2) %>,
+    month: <%= revenue.month.toFixed(2) %>,
+    total: <%= revenue.total.toFixed(2) %>
+  };
+
+  const creatorData = {
+    day: <%- JSON.stringify(creators.day) %>,
+    month: <%- JSON.stringify(creators.month) %>,
+    total: <%- JSON.stringify(creators.total) %>
+  };
+
+  function changeRevenue(period) {
+    const labels = {
+      day: 'Tageseinnahmen',
+      month: 'Monatseinnahmen',
+      total: 'Gesamteinnahmen'
     };
 
-    const creatorData = {
-      day: <%- JSON.stringify(creators.day) %>,
-      month: <%- JSON.stringify(creators.month) %>,
-      total: <%- JSON.stringify(creators.total) %>
-    };
+    const value = revenueData[period].toFixed(2) + ' €';
+    document.getElementById('revenueTitle').innerHTML = `${labels[period]}: <span id="revenueAmount">${value}</span>`;
+  }
 
-    function changeRevenue(period) {
-      document.getElementById('revenueAmount').textContent = revenueData[period].toFixed(2) + ' €';
-    }
+  function changeCreators(period) {
+    document.getElementById('creatorPeriod').textContent = {
+      day: 'Heute',
+      month: 'Diesen Monat',
+      total: 'Insgesamt'
+    }[period];
 
-    function changeCreators(period) {
-      document.getElementById('creatorPeriod').textContent = {
-        day: 'Heute',
-        month: 'Diesen Monat',
-        total: 'Insgesamt'
-      }[period];
-
-      const list = document.getElementById('creatorList');
-      list.innerHTML = '';
-      creatorData[period].forEach(entry => {
-        const div = document.createElement('div');
-        div.className = 'dashboard-box';
-        div.textContent = `${entry.name} – ${entry.amount.toFixed(2)} €`;
-        list.appendChild(div);
-      });
-    }
-  </script>
+    const list = document.getElementById('creatorList');
+    list.innerHTML = '';
+    creatorData[period].forEach(entry => {
+      const div = document.createElement('div');
+      div.className = 'dashboard-box';
+      div.textContent = `${entry.name} – ${entry.amount.toFixed(2)} €`;
+      list.appendChild(div);
+    });
+  }
+</script>
 </body>
 </html>
