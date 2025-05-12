@@ -91,3 +91,23 @@ main {
   margin-bottom: 10px;
   text-align: center;
 }
+
+.admin-menu {
+  list-style: none;
+  padding: 0;
+  margin-top: 2rem;
+}
+
+.admin-menu li {
+  margin: 10px 0;
+}
+
+.admin-menu a {
+  color: #00bfff;
+  text-decoration: none;
+  font-size: 1.2rem;
+}
+
+.admin-menu a:hover {
+  text-decoration: underline;
+}
