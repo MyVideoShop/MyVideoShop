@@ -107,6 +107,31 @@
         list.appendChild(div);
       });
     }
+
+<!-- Top-Kategorien -->
+<h2 class="section-title">Top 5 Kategorien</h2>
+<div class="dashboard-grid">
+  <% ['Fitness', 'Gaming', 'Kochen', 'DIY', 'Tiere'].forEach((cat, i) => { %>
+    <div class="dashboard-box">
+      <div class="dashboard-box-title"><%= cat %></div>
+      <p><%= 50 - i * 7 %> Käufe</p>
+    </div>
+  <% }) %>
+</div>
+
+<!-- Besucherstatistik -->
+<h2 class="section-title">Besucher</h2>
+<div class="dashboard-grid">
+  <div class="dashboard-box">
+    <div class="dashboard-box-title">Aktuelle Besucher</div>
+    <p>15 gerade online</p>
+  </div>
+  <div class="dashboard-box">
+    <div class="dashboard-box-title">Seitenaufrufe gesamt</div>
+    <p>3.278</p>
+  </div>
+</div>
+
   </script>
 </body>
 </html>
