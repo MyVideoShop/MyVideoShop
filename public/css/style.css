@@ -16,29 +16,46 @@ header {
   align-items: center;
 }
 
-header h1 {
-  margin: 0;
-  font-size: 1.8em;
+header .left {
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  height: 40px;
+}
+
+.shop-title {
+  font-size: 2rem;
+  margin-left: 15px;
   color: #f0f0f0;
+  text-decoration: none;
   cursor: pointer;
 }
 
-header button {
+.shop-title:hover {
+  text-decoration: underline;
+}
+
+header .right button {
   background-color: #3f51b5;
   color: white;
   border: none;
   padding: 10px 16px;
   border-radius: 5px;
   cursor: pointer;
+  font-size: 1em;
 }
 
-header button:hover {
+header .right button:hover {
   background-color: #5c6bc0;
 }
 
-/* Modal-Layout */
+/* Modal */
 .modal {
   display: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
   position: fixed;
   z-index: 1000;
   left: 0;
@@ -47,6 +64,10 @@ header button:hover {
   height: 100%;
   overflow: auto;
   background-color: rgba(0, 0, 0, 0.6);
+}
+
+.modal.show {
+  opacity: 1;
 }
 
 .modal-content {
