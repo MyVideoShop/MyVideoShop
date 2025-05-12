@@ -24,13 +24,13 @@ app.get('/creator/:name', (req, res) => {
   res.render('creator', { name });
 });
 
-app.get('/admin/:section', (req, res) => {
-  const section = req.params.section;
-  res.send(`<h1 style="color:white; background:#121212; padding:2rem;">Placeholder: ${section}</h1><a href="/admin" style="color:cyan;">Zurück zum Dashboard</a>`);
-});
-
 app.get('/admin/stats', (req, res) => {
   res.render('admin-stats');
+});
+
+// Muss am Ende stehen:
+app.get('/admin/:section', (req, res) => {
+  res.status(404).send('Diese Admin-Seite existiert nicht.');
 });
 
 const PORT = process.env.PORT || 3000;
