@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Supportnachrichten</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <%- include('partials/admin-header') %>
+
+  <h1>Supportnachrichten</h1>
+  <div class="box-container">
+    <% messages.forEach(msg => { %>
+      <div class="hover-box" onclick="openModal('<%= msg.id %>')">
+        <strong><%= msg.title %></strong>
+        <p><%= msg.preview %></p>
+      </div>
+
+      <div class="modal" id="modal-<%= msg.id %>">
+        <div class="modal-content">
+          <h2><%= msg.title %></h2>
+          <p><%= msg.full %></p>
+          <small>Gesendet am: <%= msg.time %></small><br><br>
+          <form action="/admin/support/delete/<%= msg.id %>" method="POST">
+            <button type="submit">Löschen</button>
+          </form>
+          <button onclick="closeModal('<%= msg.id %>')">Schließen</button>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+
+  <script>
+    function openModal(id) {
+      document.getElementById('modal-' + id).style.display = 'block';
+    }
+    function closeModal(id) {
+      document.getElementById('modal-' + id).style.display = 'none';
+    }
+  </script>
+</body>
+</html>
