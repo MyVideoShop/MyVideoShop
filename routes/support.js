@@ -20,10 +20,9 @@ router.post('/send', (req, res) => {
   };
 
   try {
-    let messages = [];
-    if (fs.existsSync(messagesFile)) {
-      messages = JSON.parse(fs.readFileSync(messagesFile));
-    }
+    let messages = fs.existsSync(messagesFile)
+      ? JSON.parse(fs.readFileSync(messagesFile))
+      : [];
 
     const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
     messages = messages.filter(msg => new Date(msg.date).getTime() > oneWeekAgo);
@@ -31,10 +30,10 @@ router.post('/send', (req, res) => {
     messages.push(message);
     fs.writeFileSync(messagesFile, JSON.stringify(messages, null, 2));
 
-    return res.json({ success: true });
+    res.json({ success: true });
   } catch (err) {
     console.error('Fehler beim Speichern der Nachricht:', err);
-    res.status(500).json({ success: false, message: 'Fehler beim Speichern' });
+    res.status(500).json({ success: false, message: 'Serverfehler beim Speichern.' });
   }
 });
 
