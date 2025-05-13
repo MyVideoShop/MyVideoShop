@@ -15,6 +15,9 @@ if (!fs.existsSync(statsFile)) {
 const adminSupportRouter = require('./routes/admin/support');
 app.use('/admin/support', adminSupportRouter);
 
+const supportRouter = require('./routes/support');
+app.use('/support', supportRouter);
+
 // Supportnachrichten älter als 7 Tage automatisch löschen
 setInterval(async () => {
   const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
