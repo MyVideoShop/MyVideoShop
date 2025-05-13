@@ -16,6 +16,11 @@ if (!fs.existsSync(statsFile)) {
   fs.writeFileSync(statsFile, JSON.stringify({ total: 0, online: 0 }));
 }
 
+const supportFile = path.join(__dirname, 'data', 'supportMessages.json');
+if (!fs.existsSync(supportFile)) {
+  fs.writeFileSync(supportFile, JSON.stringify([]));
+}
+
 // Supportnachrichten-Model für automatische Löschung (nur wenn Mongoose genutzt wird)
 let SupportMessage;
 try {
