@@ -1,4 +1,3 @@
-// routes/support.js
 const express = require('express');
 const router = express.Router();
 const fs = require('fs');
@@ -6,7 +5,26 @@ const path = require('path');
 
 const messagesFile = path.join(__dirname, '../data/supportMessages.json');
 
-// POST /support/send – Nachricht speichern
+// GET /admin/support – Support-Seite anzeigen
+router.get('/', (req, res) => {
+    try {
+        let messages = [];
+        if (fs.existsSync(messagesFile)) {
+            messages = JSON.parse(fs.readFileSync(messagesFile));
+        }
+
+        // Alte Nachrichten (>7 Tage) rausfiltern
+        const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+        messages = messages.filter(msg => new Date(msg.date).getTime() > oneWeekAgo);
+
+        res.render('admin/support', { messages });
+    } catch (err) {
+        console.error('Fehler beim Laden der Supportseite:', err);
+        res.status(500).send('Fehler beim Laden der Seite');
+    }
+});
+
+// POST /admin/support/send – Nachricht speichern
 router.post('/send', async (req, res) => {
     const { title, description } = req.body;
 
@@ -41,7 +59,7 @@ router.post('/send', async (req, res) => {
     }
 });
 
-// GET /support/messages – Liste der Nachrichten (für Admin)
+// GET /admin/support/messages – Liste der Nachrichten (JSON)
 router.get('/messages', (req, res) => {
     try {
         let messages = [];
@@ -49,7 +67,6 @@ router.get('/messages', (req, res) => {
             messages = JSON.parse(fs.readFileSync(messagesFile));
         }
 
-        // Alte Nachrichten (>7 Tage) rausfiltern
         const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
         messages = messages.filter(msg => new Date(msg.date).getTime() > oneWeekAgo);
 
@@ -60,7 +77,7 @@ router.get('/messages', (req, res) => {
     }
 });
 
-// DELETE /support/delete/:id – Nachricht löschen
+// DELETE /admin/support/delete/:id – Nachricht löschen
 router.delete('/delete/:id', (req, res) => {
     const { id } = req.params;
     try {
