@@ -1,62 +1,10 @@
-<%- include('../partials/header', { title: 'Supportnachrichten' }) %>
-
-<h1>Supportnachrichten</h1>
-
-<div class="support-messages">
-    <% if (messages.length === 0) { %>
-        <p>Keine Nachrichten vorhanden.</p>
-    <% } else { %>
-        <% messages.forEach(function(message, index) { %>
-            <div class="support-box" onclick="openSupportModal(<%= index %>)">
-                <h3><%= message.title %></h3>
-                <p><%= message.description.substring(0, 50) %>...</p>
-            </div>
-        <% }) %>
-    <% } %>
-</div>
-
-<!-- Modal -->
-<div id="supportModal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeSupportModal()">&times;</span>
-        <h2 id="modalTitle"></h2>
-        <p id="modalDescription"></p>
-        <form id="deleteForm" method="POST">
-            <button type="submit" class="delete-button" onclick="return confirm('Möchtest du diese Nachricht wirklich löschen?')">Nachricht löschen</button>
-        </form>
-    </div>
-</div>
-
-<script>
-    const messages = <%- JSON.stringify(messages) %>;
-
-    function openSupportModal(index) {
-        const modal = document.getElementById("supportModal");
-        const titleEl = document.getElementById("modalTitle");
-        const descEl = document.getElementById("modalDescription");
-        const form = document.getElementById("deleteForm");
-
-        titleEl.textContent = messages[index].title;
-        descEl.textContent = messages[index].description;
-        form.action = `/admin/support/delete/${messages[index]._id}`;
-
-        modal.style.display = "block";
-    }
-
-    function closeSupportModal() {
-        document.getElementById("supportModal").style.display = "none";
-    }
-
-    // Modal schließen, wenn man außerhalb klickt
-    window.onclick = function(event) {
-        const modal = document.getElementById("supportModal");
-        if (event.target === modal) {
-            modal.style.display = "none";
-        }
-    };
-</script>
-
-<style>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Supportnachrichten – Admin Dashboard</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
     .support-messages {
         display: flex;
         flex-wrap: wrap;
@@ -123,6 +71,68 @@
     .delete-button:hover {
         background-color: #c9302c;
     }
-</style>
+  </style>
+</head>
+<body class="dark">
+  <header>
+    <h1><a href="/admin" class="dashboard-title">Admin Dashboard</a></h1>
+  </header>
 
-<%- include('../partials/footer') %>
+  <main>
+    <h1>Supportnachrichten</h1>
+
+    <div class="support-messages">
+      <% if (messages.length === 0) { %>
+          <p>Keine Nachrichten vorhanden.</p>
+      <% } else { %>
+          <% messages.forEach(function(message, index) { %>
+              <div class="support-box" onclick="openSupportModal(<%= index %>)">
+                  <h3><%= message.title %></h3>
+                  <p><%= message.description.substring(0, 50) %>...</p>
+              </div>
+          <% }) %>
+      <% } %>
+    </div>
+
+    <!-- Modal -->
+    <div id="supportModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeSupportModal()">&times;</span>
+            <h2 id="modalTitle"></h2>
+            <p id="modalDescription"></p>
+            <form id="deleteForm" method="POST">
+                <button type="submit" class="delete-button" onclick="return confirm('Möchtest du diese Nachricht wirklich löschen?')">Nachricht löschen</button>
+            </form>
+        </div>
+    </div>
+  </main>
+
+  <script>
+      const messages = <%- JSON.stringify(messages) %>;
+
+      function openSupportModal(index) {
+          const modal = document.getElementById("supportModal");
+          const titleEl = document.getElementById("modalTitle");
+          const descEl = document.getElementById("modalDescription");
+          const form = document.getElementById("deleteForm");
+
+          titleEl.textContent = messages[index].title;
+          descEl.textContent = messages[index].description;
+          form.action = `/admin/support/delete/${messages[index]._id}`;
+
+          modal.style.display = "block";
+      }
+
+      function closeSupportModal() {
+          document.getElementById("supportModal").style.display = "none";
+      }
+
+      window.onclick = function(event) {
+          const modal = document.getElementById("supportModal");
+          if (event.target === modal) {
+              modal.style.display = "none";
+          }
+      };
+  </script>
+</body>
+</html>
