@@ -1,45 +1,81 @@
 // routes/support.js
 const express = require('express');
 const router = express.Router();
-const SupportMessage = require('../models/SupportMessage');
+const fs = require('fs');
+const path = require('path');
 
-// Neue Nachricht speichern
+const messagesFile = path.join(__dirname, '../data/supportMessages.json');
+
+// POST /support/send – Nachricht speichern
 router.post('/send', async (req, res) => {
-  const { title, description } = req.body;
-  if (!title || description.length < 10 || description.length > 200) {
-    return res.status(400).send('Ungültige Eingabe.');
-  }
+    const { title, description } = req.body;
 
-  try {
-    await SupportMessage.create({
-      title,
-      description,
-      createdAt: new Date()
-    });
-    res.status(200).send('Nachricht gespeichert');
-  } catch (err) {
-    res.status(500).send('Fehler beim Speichern');
-  }
+    if (!title || !description) {
+        return res.status(400).send('Titel und Beschreibung erforderlich.');
+    }
+
+    const message = {
+        id: Date.now().toString(),
+        title,
+        description,
+        date: new Date().toISOString()
+    };
+
+    try {
+        let messages = [];
+        if (fs.existsSync(messagesFile)) {
+            messages = JSON.parse(fs.readFileSync(messagesFile));
+        }
+
+        // Alte Nachrichten (>7 Tage) rausfiltern
+        const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+        messages = messages.filter(msg => new Date(msg.date).getTime() > oneWeekAgo);
+
+        messages.push(message);
+        fs.writeFileSync(messagesFile, JSON.stringify(messages, null, 2));
+
+        res.redirect('/');
+    } catch (err) {
+        console.error('Fehler beim Speichern der Nachricht:', err);
+        res.status(500).send('Fehler beim Speichern');
+    }
 });
 
-// Alle Nachrichten für Admin anzeigen
-router.get('/admin', async (req, res) => {
-  try {
-    const messages = await SupportMessage.find({}).sort({ createdAt: -1 });
-    res.render('admin/support', { messages });
-  } catch (err) {
-    res.status(500).send('Fehler beim Laden');
-  }
+// GET /support/messages – Liste der Nachrichten (für Admin)
+router.get('/messages', (req, res) => {
+    try {
+        let messages = [];
+        if (fs.existsSync(messagesFile)) {
+            messages = JSON.parse(fs.readFileSync(messagesFile));
+        }
+
+        // Alte Nachrichten (>7 Tage) rausfiltern
+        const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+        messages = messages.filter(msg => new Date(msg.date).getTime() > oneWeekAgo);
+
+        res.json(messages);
+    } catch (err) {
+        console.error('Fehler beim Lesen der Nachrichten:', err);
+        res.status(500).send('Fehler beim Lesen');
+    }
 });
 
-// Nachricht löschen
-router.post('/delete/:id', async (req, res) => {
-  try {
-    await SupportMessage.findByIdAndDelete(req.params.id);
-    res.status(200).send('Gelöscht');
-  } catch (err) {
-    res.status(500).send('Fehler beim Löschen');
-  }
+// DELETE /support/delete/:id – Nachricht löschen
+router.delete('/delete/:id', (req, res) => {
+    const { id } = req.params;
+    try {
+        let messages = [];
+        if (fs.existsSync(messagesFile)) {
+            messages = JSON.parse(fs.readFileSync(messagesFile));
+        }
+
+        messages = messages.filter(msg => msg.id !== id);
+        fs.writeFileSync(messagesFile, JSON.stringify(messages, null, 2));
+        res.status(200).send('Nachricht gelöscht');
+    } catch (err) {
+        console.error('Fehler beim Löschen:', err);
+        res.status(500).send('Fehler beim Löschen');
+    }
 });
 
 module.exports = router;
