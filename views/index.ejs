@@ -26,8 +26,8 @@
   <!-- Support Modal -->
   <div class="modal hidden" id="supportModal">
     <div class="modal-content">
-      <form action="/support/send" method="POST">
-        <h2>Supportnachricht</h2>
+      <h2>Supportnachricht</h2>
+      <form id="supportForm">
         <input type="text" name="title" placeholder="Titel" required><br>
         <textarea name="description" placeholder="Beschreibung (10–200 Wörter)" minlength="10" maxlength="200" required></textarea><br>
         <div class="modal-buttons">
@@ -35,6 +35,7 @@
           <button type="button" onclick="document.getElementById('supportModal').classList.add('hidden')">Schließen</button>
         </div>
       </form>
+      <div id="supportSuccess" class="form-message"></div>
     </div>
   </div>
 
@@ -57,6 +58,8 @@
     </div>
   </div>
 
+  <!-- Skripte -->
   <script src="/js/script.js"></script>
+  <script src="/js/supportModal.js"></script>
 </body>
 </html>
