@@ -12,10 +12,8 @@ if (!fs.existsSync(statsFile)) {
   fs.writeFileSync(statsFile, JSON.stringify({ total: 0, online: 0 }));
 }
 
-const supportRoutes = require('./routes/support');
-const SupportMessage = require('./models/SupportMessage');
-
-app.use('/support', supportRoutes);
+const adminSupportRouter = require('./routes/admin/support');
+app.use('/admin/support', adminSupportRouter);
 
 // Supportnachrichten älter als 7 Tage automatisch löschen
 setInterval(async () => {
