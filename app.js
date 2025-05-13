@@ -3,50 +3,56 @@ const session = require('express-session');
 const fs = require('fs');
 const path = require('path');
 const app = express();
+
+// Routen einbinden
 const authRoutes = require('./routes/auth');
 const adminStatsRoute = require('./routes/admin/stats');
-const statsFile = path.join(__dirname, 'data', 'visits.json');
+const adminSupportRouter = require('./routes/admin/support');
+const supportRouter = require('./routes/support');
 
-// Stelle sicher, dass Datei existiert
+// Besucher-Statistik-Datei
+const statsFile = path.join(__dirname, 'data', 'visits.json');
 if (!fs.existsSync(statsFile)) {
   fs.writeFileSync(statsFile, JSON.stringify({ total: 0, online: 0 }));
 }
 
-const adminSupportRouter = require('./routes/admin/support');
-app.use('/admin/support', adminSupportRouter);
+// Supportnachrichten-Model für automatische Löschung (nur wenn Mongoose genutzt wird)
+let SupportMessage;
+try {
+  SupportMessage = require('./models/SupportMessage');
+  setInterval(async () => {
+    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    await SupportMessage.deleteMany({ createdAt: { $lt: weekAgo } });
+  }, 6 * 60 * 60 * 1000); // alle 6 Stunden prüfen
+} catch (err) {
+  console.warn('SupportMessage-Modell nicht gefunden – automatische Löschung deaktiviert');
+}
 
-const supportRouter = require('./routes/support');
-app.use('/support', supportRouter);
+// Middleware
+app.use(express.static('public'));
+app.use(express.json()); // für JSON-Anfragen
+app.use(express.urlencoded({ extended: true })); // für Formulardaten
 
-// Supportnachrichten älter als 7 Tage automatisch löschen
-setInterval(async () => {
-  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-  await SupportMessage.deleteMany({ createdAt: { $lt: weekAgo } });
-}, 6 * 60 * 60 * 1000); // alle 6 Stunden prüfen
-
-// Session-Konfiguration
 app.use(session({
-  secret: 'geheimnis123', // ändere das in Produktion!
+  secret: 'geheimnis123', // In Produktion ändern
   resave: false,
   saveUninitialized: true,
-  cookie: { maxAge: 5 * 60 * 1000 } // Session läuft nach 5 Min Inaktivität ab
+  cookie: { maxAge: 5 * 60 * 1000 } // 5 Minuten
 }));
 
-app.use(express.static('public'));
-app.use(express.json());
+// View-Engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Middleware: Online-Zähler aktualisieren
+// Besucher-Online-Zähler
 app.use((req, res, next) => {
   let stats = JSON.parse(fs.readFileSync(statsFile));
 
-  // Prüfe, ob die Session bereits gezählt wurde
   if (!req.session.hasCountedOnline) {
     stats.online += 1;
     req.session.hasCountedOnline = true;
 
-    // Entferne Online-Zähler bei Session-Ende automatisch (nach Ablauf siehe unten)
+    // Automatisches Entfernen nach Ablauf der Session
     setTimeout(() => {
       let updated = JSON.parse(fs.readFileSync(statsFile));
       updated.online = Math.max(0, updated.online - 1);
@@ -58,13 +64,17 @@ app.use((req, res, next) => {
   next();
 });
 
+// Routen
+app.use('/admin/support', adminSupportRouter);
+app.use('/support', supportRouter);
 app.use('/admin/stats', adminStatsRoute);
 app.use('/', authRoutes);
 
-// Nur Aufrufe von außen zählen
+// Startseite mit Besucherzähler (nur externe Aufrufe zählen)
 app.get('/', (req, res) => {
   const referer = req.get('referer');
-  if (!referer || !referer.startsWith(req.protocol + '://' + req.get('host'))) {
+  const localHost = req.protocol + '://' + req.get('host');
+  if (!referer || !referer.startsWith(localHost)) {
     let stats = JSON.parse(fs.readFileSync(statsFile));
     stats.total += 1;
     fs.writeFileSync(statsFile, JSON.stringify(stats, null, 2));
@@ -72,18 +82,22 @@ app.get('/', (req, res) => {
   res.render('index', { shopName: 'ShopMyVideos' });
 });
 
+// Admin-Startseite
 app.get('/admin', (req, res) => {
   res.render('admin');
 });
 
+// Creator-Bereich
 app.get('/creator/:name', (req, res) => {
   const name = req.params.name;
   res.render('creator', { name });
 });
 
+// Fehlerseite für ungültige Admin-Unterseiten
 app.get('/admin/:section', (req, res) => {
   res.status(404).send('Diese Admin-Seite existiert nicht.');
 });
 
+// Server starten
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server läuft auf Port ${PORT}`));
