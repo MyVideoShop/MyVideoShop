@@ -20,21 +20,23 @@
   <!-- Creator Login Button -->
   <button id="loginButton" class="corner-btn">Creator Login</button>
 
-<!-- Button -->
-<button onclick="document.getElementById('supportModal').style.display='block'">Support kontaktieren</button>
+  <!-- Support Button -->
+  <button id="supportButton" class="corner-btn" style="right: 160px;">Support kontaktieren</button>
 
-<!-- Modal -->
-<div class="modal" id="supportModal">
-  <div class="modal-content">
-    <form action="/support/send" method="POST">
-      <h2>Supportnachricht</h2>
-      <input type="text" name="title" placeholder="Titel" required><br>
-      <textarea name="description" placeholder="Beschreibung (10–200 Wörter)" minlength="10" maxlength="200" required></textarea><br>
-      <button type="submit">Senden</button>
-      <button type="button" onclick="document.getElementById('supportModal').style.display='none'">Schließen</button>
-    </form>
+  <!-- Support Modal -->
+  <div class="modal hidden" id="supportModal">
+    <div class="modal-content">
+      <form action="/support/send" method="POST">
+        <h2>Supportnachricht</h2>
+        <input type="text" name="title" placeholder="Titel" required><br>
+        <textarea name="description" placeholder="Beschreibung (10–200 Wörter)" minlength="10" maxlength="200" required></textarea><br>
+        <div class="modal-buttons">
+          <button type="submit">Senden</button>
+          <button type="button" onclick="document.getElementById('supportModal').classList.add('hidden')">Schließen</button>
+        </div>
+      </form>
+    </div>
   </div>
-</div>
 
   <!-- Login Modal -->
   <div id="loginModal" class="modal hidden">
