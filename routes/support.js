@@ -6,20 +6,20 @@ const router = express.Router();
 const filePath = path.join(__dirname, '..', 'data', 'supportMessages.json');
 const MAX_MESSAGES = 500;
 
-// Stelle sicher, dass Datei existiert
+// Datei anlegen, falls nicht vorhanden
 if (!fs.existsSync(filePath)) {
   fs.writeFileSync(filePath, '[]');
 }
 
-// In-Memory-Sperre zur Race-Condition-Vermeidung
+// Race-Condition-Vermeidung per Sperre
 let writeInProgress = false;
 
-// Helferfunktion: Nachricht speichern (wartet bei parallelem Zugriff)
+// Nachricht sicher speichern
 async function saveMessage(newMessage) {
   return new Promise((resolve, reject) => {
     const tryWrite = () => {
       if (writeInProgress) {
-        return setTimeout(tryWrite, 20); // wiederholen bis frei
+        return setTimeout(tryWrite, 20);
       }
 
       writeInProgress = true;
@@ -37,13 +37,12 @@ async function saveMessage(newMessage) {
           messages = [];
         }
 
-        // Wenn Limit erreicht: Nachricht verwerfen
         if (messages.length >= MAX_MESSAGES) {
           writeInProgress = false;
-          return resolve(false); // nicht gespeichert
+          return resolve(false); // nicht gespeichert – Limit erreicht
         }
 
-        messages.unshift(newMessage); // neueste oben
+        messages.unshift(newMessage);
 
         fs.writeFile(filePath, JSON.stringify(messages, null, 2), (err) => {
           writeInProgress = false;
@@ -57,31 +56,32 @@ async function saveMessage(newMessage) {
   });
 }
 
-router.post('/', async (req, res) => {
+// POST /support/send – Supportnachricht speichern
+router.post('/send', async (req, res) => {
   const { title, description } = req.body;
 
   if (!title || !description) {
-    return res.status(400).send('Titel und Beschreibung sind erforderlich.');
+    return res.status(400).json({ success: false, message: 'Titel und Beschreibung sind erforderlich.' });
   }
 
   const newMessage = {
-    id: Date.now(),
+    id: Date.now().toString(),
     title,
     description,
-    createdAt: new Date().toISOString()
+    date: new Date().toISOString()
   };
 
   try {
     const saved = await saveMessage(newMessage);
+
     if (saved) {
-      res.status(200).send('Nachricht gesendet.');
+      res.status(200).json({ success: true, message: 'Nachricht erfolgreich gespeichert.' });
     } else {
-      // stiller Abbruch – Limit erreicht
-      res.status(200).send('Nachricht wurde empfangen.');
+      res.status(200).json({ success: true, message: 'Nachrichtenlimit erreicht. Nachricht nicht gespeichert.' });
     }
   } catch (err) {
     console.error('Fehler beim Speichern:', err);
-    res.status(500).send('Serverfehler beim Speichern.');
+    res.status(500).json({ success: false, message: 'Serverfehler beim Speichern.' });
   }
 });
 
