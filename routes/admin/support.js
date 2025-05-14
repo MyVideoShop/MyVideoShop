@@ -5,6 +5,17 @@ const router = express.Router();
 
 const filePath = path.join(__dirname, '../../data/supportMessages.json');
 
+// Nachrichten, die älter als 7 Tage sind, entfernen
+function removeOldMessages(messages) {
+  const now = new Date();
+  return messages.filter(msg => {
+    const msgDate = new Date(msg.date);
+    const ageInMs = now - msgDate;
+    const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
+    return ageInMs < sevenDaysInMs;
+  });
+}
+
 // Route: GET /admin/support – Nachrichten anzeigen
 router.get('/', (req, res) => {
   let messages = [];
@@ -13,6 +24,16 @@ router.get('/', (req, res) => {
     if (fs.existsSync(filePath)) {
       const data = fs.readFileSync(filePath, 'utf8');
       messages = JSON.parse(data);
+
+      // Alte Nachrichten rausfiltern
+      const recentMessages = removeOldMessages(messages);
+
+      // Datei bei Bedarf aktualisieren
+      if (recentMessages.length !== messages.length) {
+        fs.writeFileSync(filePath, JSON.stringify(recentMessages, null, 2));
+      }
+
+      messages = recentMessages;
     }
   } catch (err) {
     console.error('Fehler beim Laden der Nachrichten:', err);
