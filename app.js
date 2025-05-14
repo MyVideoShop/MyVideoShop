@@ -8,6 +8,7 @@ const app = express();
 const authRoutes = require('./routes/auth');
 const adminStatsRoute = require('./routes/admin/stats');
 const adminSupportRouter = require('./routes/admin/support');
+const adminVideosRouter = require('./routes/admin/videos');
 const supportRouter = require('./routes/support');
 
 // Besucher-Statistik-Datei
@@ -16,6 +17,7 @@ if (!fs.existsSync(statsFile)) {
   fs.writeFileSync(statsFile, JSON.stringify({ total: 0, online: 0 }));
 }
 
+// Supportnachrichten-Datei
 const supportFile = path.join(__dirname, 'data', 'supportMessages.json');
 if (!fs.existsSync(supportFile)) {
   fs.writeFileSync(supportFile, JSON.stringify([]));
@@ -35,14 +37,14 @@ try {
 
 // Middleware
 app.use(express.static('public'));
-app.use(express.json()); // für JSON-Anfragen
-app.use(express.urlencoded({ extended: true })); // für Formulardaten
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use(session({
-  secret: 'geheimnis123', // In Produktion ändern
+  secret: 'geheimnis123',
   resave: false,
   saveUninitialized: true,
-  cookie: { maxAge: 5 * 60 * 1000 } // 5 Minuten
+  cookie: { maxAge: 5 * 60 * 1000 }
 }));
 
 // View-Engine
@@ -57,7 +59,6 @@ app.use((req, res, next) => {
     stats.online += 1;
     req.session.hasCountedOnline = true;
 
-    // Automatisches Entfernen nach Ablauf der Session
     setTimeout(() => {
       let updated = JSON.parse(fs.readFileSync(statsFile));
       updated.online = Math.max(0, updated.online - 1);
@@ -69,13 +70,14 @@ app.use((req, res, next) => {
   next();
 });
 
-// Routen
+// Routen einbinden
 app.use('/admin/support', adminSupportRouter);
+app.use('/admin/videos', adminVideosRouter);
 app.use('/support', supportRouter);
 app.use('/admin/stats', adminStatsRoute);
 app.use('/', authRoutes);
 
-// Startseite mit Besucherzähler (nur externe Aufrufe zählen)
+// Startseite
 app.get('/', (req, res) => {
   const referer = req.get('referer');
   const localHost = req.protocol + '://' + req.get('host');
@@ -92,7 +94,7 @@ app.get('/admin', (req, res) => {
   res.render('admin');
 });
 
-// Creator-Bereich
+// Creator-Seite
 app.get('/creator/:name', (req, res) => {
   const name = req.params.name;
   res.render('creator', { name });
