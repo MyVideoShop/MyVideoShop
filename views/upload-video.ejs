@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Video hochladen</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="dark">
+  <header>
+    <h1><a href="/admin" class="dashboard-title">Admin Dashboard</a></h1>
+  </header>
+
+  <main>
+    <h2>Neues Video hochladen</h2>
+    <form action="/admin/upload" method="POST">
+      <label for="title">Titel:</label><br>
+      <input type="text" name="title" id="title" required><br><br>
+
+      <label for="description">Beschreibung:</label><br>
+      <textarea name="description" id="description" required></textarea><br><br>
+
+      <label for="embedUrl">YouTube Embed-Link (z. B. https://www.youtube.com/embed/...):</label><br>
+      <input type="url" name="embedUrl" id="embedUrl" required><br><br>
+
+      <button type="submit">Video speichern</button>
+    </form>
+  </main>
+</body>
+</html>
