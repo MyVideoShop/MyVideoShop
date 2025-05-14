@@ -2,26 +2,28 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
-const { processAndUploadVideo } = require('../../utils/videoProcessor');
-
-// Speicherort für hochgeladene Videos
-const uploadDir = path.join(__dirname, '../../uploads');
 const fs = require('fs');
+const { addToQueue } = require('../../utils/videoQueue');
+
+const uploadDir = path.join(__dirname, '../../uploads');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 
-// Multer-Upload-Handler
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadDir),
   filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
 });
 const upload = multer({ storage });
 
-// Route: GET /admin/upload – Seite anzeigen
+// Kategorien laden (falls verwendet)
+const getCategories = () => {
+  const file = path.join(__dirname, '../../data/categories.json');
+  return fs.existsSync(file) ? JSON.parse(fs.readFileSync(file)) : [];
+};
+
 router.get('/', (req, res) => {
-  res.render('admin-upload');
+  res.render('admin-upload', { categories: getCategories(), success: false });
 });
 
-// Route: POST /admin/upload – Video verarbeiten
 router.post('/', upload.single('video'), async (req, res) => {
   const { title, description, categories } = req.body;
 
@@ -29,27 +31,17 @@ router.post('/', upload.single('video'), async (req, res) => {
     return res.status(400).send('Keine Datei hochgeladen.');
   }
 
-  try {
-    const pixeldrainLink = await processAndUploadVideo(req.file.path);
-    // Video-Daten lokal speichern
-    const videoDataFile = path.join(__dirname, '../../data/videos.json');
-    const videos = fs.existsSync(videoDataFile) ? JSON.parse(fs.readFileSync(videoDataFile)) : [];
+  addToQueue(req.file.path, {
+    title,
+    description,
+    categories: categories ? categories.split(',').map(c => c.trim()) : []
+  });
 
-    videos.unshift({
-      id: Date.now(),
-      title,
-      description,
-      categories: categories ? categories.split(',').map(s => s.trim()) : [],
-      url: pixeldrainLink,
-      date: new Date().toISOString()
-    });
-
-    fs.writeFileSync(videoDataFile, JSON.stringify(videos, null, 2));
-    res.redirect('/admin/videos');
-  } catch (err) {
-    console.error('Fehler beim Verarbeiten des Videos:', err);
-    res.status(500).send('Fehler beim Verarbeiten des Videos.');
-  }
+  // Seite erneut anzeigen mit "wird verarbeitet"
+  res.render('admin-upload', {
+    categories: getCategories(),
+    success: true
+  });
 });
 
 module.exports = router;
