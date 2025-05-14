@@ -140,7 +140,9 @@
 
           titleEl.textContent = messages[index].title;
           descEl.textContent = messages[index].description;
-          form.action = `/admin/support/delete/${messages[index]._id}`;
+
+          // Korrektur: `id` statt `_id`
+          form.action = `/admin/support/delete/${messages[index].id}`;
 
           modal.style.display = "block";
       }
