@@ -1,61 +1,48 @@
 const express = require('express');
-const router = express.Router();
 const fs = require('fs');
 const path = require('path');
+const router = express.Router();
 
-const messagesFile = path.join(__dirname, '../../data/supportMessages.json');
+const filePath = path.join(__dirname, '../../data/supportMessages.json');
 
-// GET /admin/support – Seite anzeigen
+// Route: GET /admin/support – Nachrichten anzeigen
 router.get('/', (req, res) => {
+  let messages = [];
+
   try {
-    let messages = fs.existsSync(messagesFile)
-      ? JSON.parse(fs.readFileSync(messagesFile))
-      : [];
-
-    const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    messages = messages.filter(msg => new Date(msg.date).getTime() > oneWeekAgo);
-
-    res.render('admin-support', { messages });
+    if (fs.existsSync(filePath)) {
+      const data = fs.readFileSync(filePath, 'utf8');
+      messages = JSON.parse(data);
+    }
   } catch (err) {
-    console.error('Fehler beim Laden der Supportseite:', err);
-    res.status(500).send('Fehler beim Laden der Seite');
+    console.error('Fehler beim Laden der Nachrichten:', err);
   }
+
+  res.render('admin-support', { messages });
 });
 
-// GET /admin/support/messages – JSON-Liste für Admin
-router.get('/messages', (req, res) => {
-  try {
-    let messages = fs.existsSync(messagesFile)
-      ? JSON.parse(fs.readFileSync(messagesFile))
-      : [];
-
-    const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    messages = messages.filter(msg => new Date(msg.date).getTime() > oneWeekAgo);
-
-    res.json(messages);
-  } catch (err) {
-    console.error('Fehler beim Lesen der Nachrichten:', err);
-    res.status(500).send('Fehler beim Lesen');
-  }
-});
-
-// POST /admin/support/delete/:id – Nachricht löschen
+// Route: POST /admin/support/delete/:id – Nachricht löschen
 router.post('/delete/:id', (req, res) => {
-  try {
-    let messages = fs.existsSync(messagesFile)
-      ? JSON.parse(fs.readFileSync(messagesFile))
-      : [];
+  const idToDelete = req.params.id;
 
-    const idToDelete = req.params.id;
+  try {
+    let messages = [];
+
+    if (fs.existsSync(filePath)) {
+      const data = fs.readFileSync(filePath, 'utf8');
+      messages = JSON.parse(data);
+    }
+
     const filteredMessages = messages.filter(msg => String(msg.id) !== String(idToDelete));
 
-    fs.writeFileSync(messagesFile, JSON.stringify(filteredMessages, null, 2));
+    fs.writeFileSync(filePath, JSON.stringify(filteredMessages, null, 2));
+    console.log(`Nachricht mit ID ${idToDelete} gelöscht`);
+
     res.redirect('/admin/support');
   } catch (err) {
     console.error('Fehler beim Löschen der Nachricht:', err);
-    res.status(500).send('Fehler beim Löschen');
+    res.status(500).send('Fehler beim Löschen der Nachricht.');
   }
 });
-
 
 module.exports = router;
