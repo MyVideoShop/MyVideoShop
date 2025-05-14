@@ -98,6 +98,12 @@
   <main>
     <h1>Video hochladen</h1>
 
+<% if (typeof success !== 'undefined' && success) { %>
+  <div style="background-color:#2ecc71; padding:15px; border-radius:10px; margin-bottom:20px;">
+    Upload erfolgreich! Das Video wird im Hintergrund verarbeitet.
+  </div>
+<% } %>
+
     <form action="/admin/upload" method="POST" enctype="multipart/form-data">
       <input type="text" name="title" placeholder="Videotitel" class="input-box" required />
 
