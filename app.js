@@ -9,11 +9,10 @@ const authRoutes = require('./routes/auth');
 const adminStatsRoute = require('./routes/admin/stats');
 const adminSupportRouter = require('./routes/admin/support');
 const adminVideosRouter = require('./routes/admin/videos');
-const adminUploadRouter = require('./routes/admin/upload'); // NEU
-const supportRouter = require('./routes/support');
 const adminUploadRouter = require('./routes/admin/upload');
+const supportRouter = require('./routes/support');
 
-// Besucher-Statistik-Datei
+// Wichtige Dateien anlegen falls nicht vorhanden
 const statsFile = path.join(__dirname, 'data', 'visits.json');
 if (!fs.existsSync(statsFile)) {
   fs.writeFileSync(statsFile, JSON.stringify({ total: 0, online: 0 }));
@@ -24,8 +23,10 @@ if (!fs.existsSync(supportFile)) {
   fs.writeFileSync(supportFile, JSON.stringify([]));
 }
 
-const adminUploadRouter = require('./routes/admin/upload');
-app.use('/admin/upload', adminUploadRouter);
+const videoDataPath = path.join(__dirname, 'data', 'videos.json');
+if (!fs.existsSync(videoDataPath)) {
+  fs.writeFileSync(videoDataPath, JSON.stringify([]));
+}
 
 // Supportnachrichten-Model für automatische Löschung
 let SupportMessage;
@@ -43,7 +44,6 @@ try {
 app.use(express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 app.use(session({
   secret: 'geheimnis123',
   resave: false,
@@ -79,19 +79,22 @@ app.use('/admin/support', adminSupportRouter);
 app.use('/support', supportRouter);
 app.use('/admin/stats', adminStatsRoute);
 app.use('/admin/videos', adminVideosRouter);
-app.use('/admin/upload', adminUploadRouter); // NEU
+app.use('/admin/upload', adminUploadRouter);
 app.use('/', authRoutes);
 
-// Startseite mit Besucherzähler
+// Startseite – Videos anzeigen
 app.get('/', (req, res) => {
   const referer = req.get('referer');
   const localHost = req.protocol + '://' + req.get('host');
+
   if (!referer || !referer.startsWith(localHost)) {
     let stats = JSON.parse(fs.readFileSync(statsFile));
     stats.total += 1;
     fs.writeFileSync(statsFile, JSON.stringify(stats, null, 2));
   }
-  res.render('index', { shopName: 'ShopMyVideos' });
+
+  const videos = JSON.parse(fs.readFileSync(videoDataPath));
+  res.render('index', { shopName: 'ShopMyVideos', videos });
 });
 
 // Admin-Startseite
@@ -99,7 +102,13 @@ app.get('/admin', (req, res) => {
   res.render('admin');
 });
 
-// Creator-Bereich
+// Admin: Videos verwalten
+app.get('/admin/videos', (req, res) => {
+  const videos = JSON.parse(fs.readFileSync(videoDataPath));
+  res.render('admin-videos', { videos });
+});
+
+// Creator-Profilseite
 app.get('/creator/:name', (req, res) => {
   const name = req.params.name;
   res.render('creator', { name });
