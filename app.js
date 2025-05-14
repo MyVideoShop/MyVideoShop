@@ -11,6 +11,7 @@ const adminSupportRouter = require('./routes/admin/support');
 const adminVideosRouter = require('./routes/admin/videos');
 const adminUploadRouter = require('./routes/admin/upload'); // NEU
 const supportRouter = require('./routes/support');
+const adminUploadRouter = require('./routes/admin/upload');
 
 // Besucher-Statistik-Datei
 const statsFile = path.join(__dirname, 'data', 'visits.json');
