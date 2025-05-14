@@ -9,6 +9,7 @@ const authRoutes = require('./routes/auth');
 const adminStatsRoute = require('./routes/admin/stats');
 const adminSupportRouter = require('./routes/admin/support');
 const adminVideosRouter = require('./routes/admin/videos');
+const adminUploadRouter = require('./routes/admin/upload'); // NEU
 const supportRouter = require('./routes/support');
 
 // Besucher-Statistik-Datei
@@ -17,20 +18,19 @@ if (!fs.existsSync(statsFile)) {
   fs.writeFileSync(statsFile, JSON.stringify({ total: 0, online: 0 }));
 }
 
-// Supportnachrichten-Datei
 const supportFile = path.join(__dirname, 'data', 'supportMessages.json');
 if (!fs.existsSync(supportFile)) {
   fs.writeFileSync(supportFile, JSON.stringify([]));
 }
 
-// Supportnachrichten-Model für automatische Löschung (nur wenn Mongoose genutzt wird)
+// Supportnachrichten-Model für automatische Löschung
 let SupportMessage;
 try {
   SupportMessage = require('./models/SupportMessage');
   setInterval(async () => {
     const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     await SupportMessage.deleteMany({ createdAt: { $lt: weekAgo } });
-  }, 6 * 60 * 60 * 1000); // alle 6 Stunden prüfen
+  }, 6 * 60 * 60 * 1000);
 } catch (err) {
   console.warn('SupportMessage-Modell nicht gefunden – automatische Löschung deaktiviert');
 }
@@ -70,14 +70,15 @@ app.use((req, res, next) => {
   next();
 });
 
-// Routen einbinden
+// Routen
 app.use('/admin/support', adminSupportRouter);
-app.use('/admin/videos', adminVideosRouter);
 app.use('/support', supportRouter);
 app.use('/admin/stats', adminStatsRoute);
+app.use('/admin/videos', adminVideosRouter);
+app.use('/admin/upload', adminUploadRouter); // NEU
 app.use('/', authRoutes);
 
-// Startseite
+// Startseite mit Besucherzähler
 app.get('/', (req, res) => {
   const referer = req.get('referer');
   const localHost = req.protocol + '://' + req.get('host');
@@ -94,7 +95,7 @@ app.get('/admin', (req, res) => {
   res.render('admin');
 });
 
-// Creator-Seite
+// Creator-Bereich
 app.get('/creator/:name', (req, res) => {
   const name = req.params.name;
   res.render('creator', { name });
