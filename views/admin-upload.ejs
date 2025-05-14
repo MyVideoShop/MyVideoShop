@@ -31,7 +31,7 @@
       margin-bottom: 30px;
     }
 
-    .input-box, .textarea-box, .file-box, .category-box {
+    .input-box, .textarea-box, .file-box {
       background-color: #1e1e1e;
       border-radius: 10px;
       padding: 15px;
@@ -41,43 +41,6 @@
       width: 100%;
       box-sizing: border-box;
       font-size: 16px;
-    }
-
-    .category-section {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .category-pill {
-      background-color: #333;
-      padding: 8px 12px;
-      border-radius: 20px;
-      font-size: 14px;
-    }
-
-    .add-category-input {
-      flex: 1;
-      background-color: #2a2a2a;
-      border-radius: 10px;
-      padding: 10px;
-      border: none;
-      color: white;
-    }
-
-    .add-category-btn {
-      padding: 10px 20px;
-      background-color: #007bff;
-      border: none;
-      color: white;
-      border-radius: 10px;
-      cursor: pointer;
-    }
-
-    .add-category-btn:hover {
-      background-color: #0056b3;
     }
 
     .upload-btn {
@@ -94,6 +57,37 @@
     .upload-btn:hover {
       background-color: #218838;
     }
+
+    .category-container {
+      margin-bottom: 20px;
+    }
+
+    .category-label {
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    .category-box {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      background-color: #1e1e1e;
+    }
+
+    .category-pill {
+      background-color: #333;
+      padding: 8px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .category-pill.selected {
+      background-color: #007bff;
+    }
   </style>
 </head>
 <body class="dark">
@@ -104,37 +98,78 @@
   <main>
     <h1>Video hochladen</h1>
 
-    <input type="text" placeholder="Videotitel" class="input-box" />
+    <form action="/admin/upload" method="POST" enctype="multipart/form-data">
+      <input type="text" name="title" placeholder="Videotitel" class="input-box" required />
 
-    <div class="file-box">
-      <p>Video hier hochladen (späterer Upload folgt)</p>
-    </div>
+      <div class="file-box">
+        <input type="file" name="video" accept="video/*" required />
+      </div>
 
-    <textarea class="textarea-box" placeholder="Videobeschreibung..." rows="6"></textarea>
+      <textarea name="description" class="textarea-box" placeholder="Videobeschreibung..." rows="6"></textarea>
 
-    <div class="category-section">
-      <div class="category-box category-pill">Beispiel-Kategorie</div>
-      <!-- Weitere vorhandene Kategorien folgen hier dynamisch -->
-      <input type="text" placeholder="Neue Kategorie hinzufügen..." class="add-category-input" />
-      <button class="add-category-btn" onclick="addCategory()">Hinzufügen</button>
-    </div>
+      <div class="category-container">
+        <div class="category-label">Ausgewählte Kategorien:</div>
+        <div id="selectedCategories" class="category-box"></div>
+      </div>
 
-    <button class="upload-btn">Video veröffentlichen</button>
+      <div class="category-container">
+        <div class="category-label">Vorhandene Kategorien:</div>
+        <div id="availableCategories" class="category-box">
+          <% if (typeof categories !== 'undefined') { %>
+            <% categories.forEach(function(category) { %>
+              <div class="category-pill" data-category="<%= category %>"><%= category %></div>
+            <% }) %>
+          <% } %>
+        </div>
+      </div>
+
+      <input type="hidden" name="categories" id="categoriesInput" />
+
+      <button type="submit" class="upload-btn">Video veröffentlichen</button>
+    </form>
   </main>
 
   <script>
-    function addCategory() {
-      const input = document.querySelector('.add-category-input');
-      const text = input.value.trim();
-      if (text) {
-        const container = document.querySelector('.category-section');
-        const newPill = document.createElement('div');
-        newPill.className = 'category-box category-pill';
-        newPill.textContent = text;
-        container.insertBefore(newPill, input);
-        input.value = '';
-      }
+    const availableBox = document.getElementById('availableCategories');
+    const selectedBox = document.getElementById('selectedCategories');
+    const hiddenInput = document.getElementById('categoriesInput');
+    const selectedCategories = new Set();
+
+    function updateHiddenInput() {
+      hiddenInput.value = Array.from(selectedCategories).join(',');
     }
+
+    function createPill(name) {
+      const pill = document.createElement('div');
+      pill.className = 'category-pill';
+      pill.textContent = name;
+      pill.dataset.category = name;
+      pill.addEventListener('click', () => {
+        selectedCategories.delete(name);
+        selectedBox.removeChild(pill);
+        const original = [...availableBox.children].find(el => el.dataset.category === name);
+        if (original) original.classList.remove('selected');
+        updateHiddenInput();
+      });
+      return pill;
+    }
+
+    availableBox.addEventListener('click', e => {
+      if (e.target.classList.contains('category-pill')) {
+        const name = e.target.dataset.category;
+        if (!selectedCategories.has(name)) {
+          selectedCategories.add(name);
+          e.target.classList.add('selected');
+          selectedBox.appendChild(createPill(name));
+        } else {
+          selectedCategories.delete(name);
+          e.target.classList.remove('selected');
+          const toRemove = [...selectedBox.children].find(el => el.dataset.category === name);
+          if (toRemove) selectedBox.removeChild(toRemove);
+        }
+        updateHiddenInput();
+      }
+    });
   </script>
 </body>
 </html>
