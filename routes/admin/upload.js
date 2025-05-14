@@ -1,60 +1,55 @@
 const express = require('express');
+const router = express.Router();
 const multer = require('multer');
 const path = require('path');
+const { processAndUploadVideo } = require('../../utils/videoProcessor');
+
+// Speicherort für hochgeladene Videos
+const uploadDir = path.join(__dirname, '../../uploads');
 const fs = require('fs');
-const router = express.Router();
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 
-// Speicherort für Uploads
-const uploadFolder = path.join(__dirname, '../../uploads');
-if (!fs.existsSync(uploadFolder)) fs.mkdirSync(uploadFolder);
-
-// Multer-Konfiguration
+// Multer-Upload-Handler
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadFolder);
-  },
-  filename: function (req, file, cb) {
-    const ext = path.extname(file.originalname);
-    const filename = Date.now() + ext;
-    cb(null, filename);
-  }
+  destination: (req, file, cb) => cb(null, uploadDir),
+  filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
 });
-
 const upload = multer({ storage });
 
-const { processVideo } = require('../../utils/videoProcessor');
-
-// In POST /video:
-router.post('/video', upload.single('video'), async (req, res) => {
-  const { title, description, categories } = req.body;
-  const filePath = req.file.path;
-
-  try {
-    const processedPath = await processVideo(filePath);
-    
-    // TODO: Hier folgt im nächsten Schritt der Upload zu Pixeldrain
-
-    res.status(200).json({
-      success: true,
-      message: 'Video verarbeitet',
-      processedPath
-    });
-
-  } catch (err) {
-    console.error('Verarbeitung fehlgeschlagen:', err);
-    res.status(500).json({ success: false, message: 'Verarbeitung fehlgeschlagen' });
-  }
+// Route: GET /admin/upload – Seite anzeigen
+router.get('/', (req, res) => {
+  res.render('admin-upload');
 });
 
-// Route: POST /admin/upload/video
-router.post('/video', upload.single('video'), async (req, res) => {
+// Route: POST /admin/upload – Video verarbeiten
+router.post('/', upload.single('video'), async (req, res) => {
   const { title, description, categories } = req.body;
-  const filePath = req.file.path;
 
-  // Nächster Schritt: Übergabe an Bot-Prozess
-  // Hier rufen wir später z.B. `processUploadedVideo(filePath, title, ...)` auf
+  if (!req.file) {
+    return res.status(400).send('Keine Datei hochgeladen.');
+  }
 
-  res.status(200).json({ success: true, message: 'Video empfangen und gespeichert', filePath });
+  try {
+    const pixeldrainLink = await processAndUploadVideo(req.file.path);
+    // Video-Daten lokal speichern
+    const videoDataFile = path.join(__dirname, '../../data/videos.json');
+    const videos = fs.existsSync(videoDataFile) ? JSON.parse(fs.readFileSync(videoDataFile)) : [];
+
+    videos.unshift({
+      id: Date.now(),
+      title,
+      description,
+      categories: categories ? categories.split(',').map(s => s.trim()) : [],
+      url: pixeldrainLink,
+      date: new Date().toISOString()
+    });
+
+    fs.writeFileSync(videoDataFile, JSON.stringify(videos, null, 2));
+    res.redirect('/admin/videos');
+  } catch (err) {
+    console.error('Fehler beim Verarbeiten des Videos:', err);
+    res.status(500).send('Fehler beim Verarbeiten des Videos.');
+  }
 });
 
 module.exports = router;
