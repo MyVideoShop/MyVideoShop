@@ -39,22 +39,23 @@ router.get('/messages', (req, res) => {
   }
 });
 
-// DELETE /admin/support/delete/:id – Löschen
-router.delete('/delete/:id', (req, res) => {
-  const { id } = req.params;
-
+// POST /admin/support/delete/:id – Nachricht löschen
+router.post('/delete/:id', (req, res) => {
   try {
     let messages = fs.existsSync(messagesFile)
       ? JSON.parse(fs.readFileSync(messagesFile))
       : [];
 
-    messages = messages.filter(msg => msg.id !== id);
-    fs.writeFileSync(messagesFile, JSON.stringify(messages, null, 2));
-    res.status(200).send('Nachricht gelöscht');
+    const idToDelete = req.params.id;
+    const filteredMessages = messages.filter(msg => String(msg.id) !== String(idToDelete));
+
+    fs.writeFileSync(messagesFile, JSON.stringify(filteredMessages, null, 2));
+    res.redirect('/admin/support');
   } catch (err) {
-    console.error('Fehler beim Löschen:', err);
+    console.error('Fehler beim Löschen der Nachricht:', err);
     res.status(500).send('Fehler beim Löschen');
   }
 });
+
 
 module.exports = router;
