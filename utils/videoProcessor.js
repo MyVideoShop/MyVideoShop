@@ -7,7 +7,10 @@ const axios = require('axios');
 const FormData = require('form-data');
 
 // === DEIN API-KEY HIER EINFÜGEN ===
-const PIXELDRAIN_API_KEY = 'HIER_DEIN_API_KEY_EINFÜGEN';
+const PIXELDRAIN_API_KEY = process.env.PIXELDRAIN_API_KEY;
+if (!PIXELDRAIN_API_KEY) {
+  throw new Error('PIXELDRAIN_API_KEY ist nicht gesetzt!');
+}
 
 function removeMetadataAndCompress(inputPath, outputPath) {
   return new Promise((resolve, reject) => {
