@@ -12,37 +12,43 @@
     }
 
     .video-box {
-      width: 250px;
-      padding: 1.5rem;
+      width: 300px;
       background: #1e1e1e;
       border-radius: 12px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-      cursor: pointer;
+      padding: 1rem;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
       transition: transform 0.2s, background-color 0.2s;
-      display: flex;
-      flex-direction: column;
     }
 
     .video-box:hover {
       background-color: #2a2a2a;
       transform: translateY(-5px);
-      box-shadow: 0 6px 12px rgba(0,0,0,0.6);
     }
 
     .video-box h3 {
-      margin: 0 0 10px 0;
+      margin: 0 0 8px;
       color: #fff;
     }
 
     .video-box p {
-      margin: 0;
       color: #ccc;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      word-break: break-word;
+      margin: 0 0 10px;
+    }
+
+    .video-wrapper {
+      position: relative;
+      width: 100%;
+      padding-bottom: 56.25%;
+      height: 0;
+    }
+
+    .video-wrapper iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
     }
   </style>
 </head>
@@ -54,18 +60,21 @@
   <main>
     <h1>Videos verwalten</h1>
 
-    <div class="video-grid">
-      <% if (videos.length === 0) { %>
-        <p>Keine Videos vorhanden.</p>
-      <% } else { %>
-        <% videos.forEach(function(video) { %>
+    <% if (videos.length === 0) { %>
+      <p>Keine Videos vorhanden.</p>
+    <% } else { %>
+      <div class="video-grid">
+        <% videos.forEach(video => { %>
           <div class="video-box">
             <h3><%= video.title %></h3>
             <p><%= video.description %></p>
+            <div class="video-wrapper">
+              <iframe src="<%= video.embedUrl %>" allowfullscreen></iframe>
+            </div>
           </div>
         <% }) %>
-      <% } %>
-    </div>
+      </div>
+    <% } %>
   </main>
 </body>
 </html>
