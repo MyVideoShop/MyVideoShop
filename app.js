@@ -23,6 +23,9 @@ if (!fs.existsSync(supportFile)) {
   fs.writeFileSync(supportFile, JSON.stringify([]));
 }
 
+const adminUploadRouter = require('./routes/admin/upload');
+app.use('/admin/upload', adminUploadRouter);
+
 // Supportnachrichten-Model für automatische Löschung
 let SupportMessage;
 try {
