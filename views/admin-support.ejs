@@ -27,6 +27,27 @@
         box-shadow: 0 6px 12px rgba(0,0,0,0.6);
     }
 
+    .support-box h3 {
+        margin: 0 0 10px 0;
+        color: #fff;
+    }
+
+    .support-box p {
+        color: #ccc;
+        white-space: normal;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        
+        /* Optional: Vorschau auf 3 Zeilen begrenzen */
+        /*
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        */
+    }
+
     .modal {
         display: none;
         position: fixed;
@@ -47,6 +68,7 @@
         width: 90%;
         max-width: 600px;
         position: relative;
+        color: #fff;
     }
 
     .close {
@@ -55,7 +77,7 @@
         right: 20px;
         font-size: 28px;
         font-weight: bold;
-        color: #333;
+        color: #ccc;
         cursor: pointer;
     }
 
@@ -89,7 +111,7 @@
           <% messages.forEach(function(message, index) { %>
               <div class="support-box" onclick="openSupportModal(<%= index %>)">
                   <h3><%= message.title %></h3>
-                  <p><%= message.description.substring(0, 50) %>...</p>
+                  <p><%= message.description.substring(0, 150) %>...</p>
               </div>
           <% }) %>
       <% } %>
