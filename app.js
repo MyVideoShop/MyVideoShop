@@ -4,39 +4,38 @@ const fs = require('fs');
 const path = require('path');
 const app = express();
 
-// Routen einbinden
+// Routen
 const authRoutes = require('./routes/auth');
-const adminStatsRoute = require('./routes/admin/stats');
+const supportRouter = require('./routes/support');
 const adminSupportRouter = require('./routes/admin/support');
+const adminStatsRouter = require('./routes/admin/stats');
 const adminVideosRouter = require('./routes/admin/videos');
 const adminUploadRouter = require('./routes/admin/upload');
-const supportRouter = require('./routes/support');
 
-// Wichtige Dateien anlegen falls nicht vorhanden
+// Datenpfade
 const statsFile = path.join(__dirname, 'data', 'visits.json');
+const supportFile = path.join(__dirname, 'data', 'supportMessages.json');
+const videosFile = path.join(__dirname, 'data', 'videos.json');
+
+// Sicherstellen, dass Dateien vorhanden sind
 if (!fs.existsSync(statsFile)) {
   fs.writeFileSync(statsFile, JSON.stringify({ total: 0, online: 0 }));
 }
-
-const supportFile = path.join(__dirname, 'data', 'supportMessages.json');
 if (!fs.existsSync(supportFile)) {
   fs.writeFileSync(supportFile, JSON.stringify([]));
 }
-
-const videoDataPath = path.join(__dirname, 'data', 'videos.json');
-if (!fs.existsSync(videoDataPath)) {
-  fs.writeFileSync(videoDataPath, JSON.stringify([]));
+if (!fs.existsSync(videosFile)) {
+  fs.writeFileSync(videosFile, JSON.stringify([]));
 }
 
-// Supportnachrichten-Model für automatische Löschung
-let SupportMessage;
+// Automatische Löschung alter Supportnachrichten
 try {
-  SupportMessage = require('./models/SupportMessage');
+  const SupportMessage = require('./models/SupportMessage');
   setInterval(async () => {
     const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     await SupportMessage.deleteMany({ createdAt: { $lt: weekAgo } });
   }, 6 * 60 * 60 * 1000);
-} catch (err) {
+} catch {
   console.warn('SupportMessage-Modell nicht gefunden – automatische Löschung deaktiviert');
 }
 
@@ -57,43 +56,40 @@ app.set('views', path.join(__dirname, 'views'));
 
 // Besucher-Online-Zähler
 app.use((req, res, next) => {
-  let stats = JSON.parse(fs.readFileSync(statsFile));
-
+  const stats = JSON.parse(fs.readFileSync(statsFile));
   if (!req.session.hasCountedOnline) {
     stats.online += 1;
     req.session.hasCountedOnline = true;
-
     setTimeout(() => {
-      let updated = JSON.parse(fs.readFileSync(statsFile));
+      const updated = JSON.parse(fs.readFileSync(statsFile));
       updated.online = Math.max(0, updated.online - 1);
       fs.writeFileSync(statsFile, JSON.stringify(updated, null, 2));
     }, req.session.cookie.maxAge);
   }
-
   fs.writeFileSync(statsFile, JSON.stringify(stats, null, 2));
   next();
 });
 
-// Routen
-app.use('/admin/support', adminSupportRouter);
+// Routen registrieren
 app.use('/support', supportRouter);
-app.use('/admin/stats', adminStatsRoute);
+app.use('/admin/support', adminSupportRouter);
+app.use('/admin/stats', adminStatsRouter);
 app.use('/admin/videos', adminVideosRouter);
 app.use('/admin/upload', adminUploadRouter);
 app.use('/', authRoutes);
 
-// Startseite – Videos anzeigen
+// Startseite mit Videoliste
 app.get('/', (req, res) => {
   const referer = req.get('referer');
-  const localHost = req.protocol + '://' + req.get('host');
+  const localHost = `${req.protocol}://${req.get('host')}`;
 
   if (!referer || !referer.startsWith(localHost)) {
-    let stats = JSON.parse(fs.readFileSync(statsFile));
+    const stats = JSON.parse(fs.readFileSync(statsFile));
     stats.total += 1;
     fs.writeFileSync(statsFile, JSON.stringify(stats, null, 2));
   }
 
-  const videos = JSON.parse(fs.readFileSync(videoDataPath));
+  const videos = JSON.parse(fs.readFileSync(videosFile));
   res.render('index', { shopName: 'ShopMyVideos', videos });
 });
 
@@ -104,7 +100,7 @@ app.get('/admin', (req, res) => {
 
 // Admin: Videos verwalten
 app.get('/admin/videos', (req, res) => {
-  const videos = JSON.parse(fs.readFileSync(videoDataPath));
+  const videos = JSON.parse(fs.readFileSync(videosFile));
   res.render('admin-videos', { videos });
 });
 
