@@ -19,6 +19,8 @@
         box-shadow: 0 4px 8px rgba(0,0,0,0.4);
         cursor: pointer;
         transition: transform 0.2s, background-color 0.2s;
+        display: flex;
+        flex-direction: column;
     }
 
     .support-box:hover {
@@ -33,17 +35,11 @@
     }
 
     .support-box p {
+        margin: 0;
         color: #ccc;
         white-space: normal;
-        word-wrap: break-word;
+        word-break: break-word;
         overflow-wrap: break-word;
-        
-        /* Optional: Vorschau auf 3 Zeilen begrenzen */
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        text-overflow: ellipsis;
     }
 
     .modal {
@@ -109,7 +105,7 @@
           <% messages.forEach(function(message, index) { %>
               <div class="support-box" onclick="openSupportModal(<%= index %>)">
                   <h3><%= message.title %></h3>
-                  <p><%= message.description.substring(0, 150) %>...</p>
+                  <p><%= message.description.substring(0, 150) %></p>
               </div>
           <% }) %>
       <% } %>
