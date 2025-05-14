@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Video hochladen – Admin Dashboard</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    body.dark {
+      background-color: #121212;
+      color: #fff;
+      font-family: Arial, sans-serif;
+    }
+
+    header {
+      padding: 20px;
+    }
+
+    .dashboard-title {
+      color: white;
+      text-decoration: none;
+      font-size: 24px;
+    }
+
+    main {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 30px;
+    }
+
+    h1 {
+      margin-bottom: 30px;
+    }
+
+    .input-box, .textarea-box, .file-box, .category-box {
+      background-color: #1e1e1e;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 20px;
+      border: none;
+      color: white;
+      width: 100%;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+
+    .category-section {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .category-pill {
+      background-color: #333;
+      padding: 8px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+    }
+
+    .add-category-input {
+      flex: 1;
+      background-color: #2a2a2a;
+      border-radius: 10px;
+      padding: 10px;
+      border: none;
+      color: white;
+    }
+
+    .add-category-btn {
+      padding: 10px 20px;
+      background-color: #007bff;
+      border: none;
+      color: white;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .add-category-btn:hover {
+      background-color: #0056b3;
+    }
+
+    .upload-btn {
+      width: 100%;
+      padding: 15px;
+      font-size: 16px;
+      background-color: #28a745;
+      border: none;
+      color: white;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .upload-btn:hover {
+      background-color: #218838;
+    }
+  </style>
+</head>
+<body class="dark">
+  <header>
+    <h1><a href="/admin" class="dashboard-title">Admin Dashboard</a></h1>
+  </header>
+
+  <main>
+    <h1>Video hochladen</h1>
+
+    <input type="text" placeholder="Videotitel" class="input-box" />
+
+    <div class="file-box">
+      <p>Video hier hochladen (späterer Upload folgt)</p>
+    </div>
+
+    <textarea class="textarea-box" placeholder="Videobeschreibung..." rows="6"></textarea>
+
+    <div class="category-section">
+      <div class="category-box category-pill">Beispiel-Kategorie</div>
+      <!-- Weitere vorhandene Kategorien folgen hier dynamisch -->
+      <input type="text" placeholder="Neue Kategorie hinzufügen..." class="add-category-input" />
+      <button class="add-category-btn" onclick="addCategory()">Hinzufügen</button>
+    </div>
+
+    <button class="upload-btn">Video veröffentlichen</button>
+  </main>
+
+  <script>
+    function addCategory() {
+      const input = document.querySelector('.add-category-input');
+      const text = input.value.trim();
+      if (text) {
+        const container = document.querySelector('.category-section');
+        const newPill = document.createElement('div');
+        newPill.className = 'category-box category-pill';
+        newPill.textContent = text;
+        container.insertBefore(newPill, input);
+        input.value = '';
+      }
+    }
+  </script>
+</body>
+</html>
