@@ -1,39 +1,42 @@
+const { processAndUploadVideo } = require('./videoProcessor');
 const fs = require('fs');
 const path = require('path');
-const { processAndUploadVideo } = require('./videoProcessor');
 
-const videoDataFile = path.join(__dirname, '../data/videos.json');
 const queue = [];
+let isProcessing = false;
 
-async function processQueue() {
-  if (queue.processing || queue.length === 0) return;
+const processQueue = async () => {
+  if (isProcessing || queue.length === 0) return;
+  isProcessing = true;
 
-  queue.processing = true;
-  const task = queue.shift();
+  const { filePath, metadata } = queue.shift();
 
   try {
-    const pixeldrainLink = await processAndUploadVideo(task.filePath);
+    const pixeldrainLink = await processAndUploadVideo(filePath);
+    const videoDataFile = path.join(__dirname, '../data/videos.json');
     const videos = fs.existsSync(videoDataFile) ? JSON.parse(fs.readFileSync(videoDataFile)) : [];
 
     videos.unshift({
-      id: task.id,
-      title: task.title,
-      description: task.description,
-      categories: task.categories,
+      id: Date.now(),
+      title: metadata.title,
+      description: metadata.description,
+      categories: metadata.categories,
       url: pixeldrainLink,
       date: new Date().toISOString()
     });
 
     fs.writeFileSync(videoDataFile, JSON.stringify(videos, null, 2));
-    console.log(`Video ${task.title} verarbeitet.`);
   } catch (err) {
-    console.error('Fehler in der Warteschlange:', err);
+    console.error('Fehler beim Verarbeiten aus Warteschlange:', err);
   } finally {
-    queue.processing = false;
-    processQueue(); // nächstes Element verarbeiten
+    isProcessing = false;
+    processQueue(); // nächstes Video verarbeiten
   }
-}
+};
 
-setInterval(processQueue, 5000); // alle 5 Sek. prüfen
+const addToQueue = (filePath, metadata) => {
+  queue.push({ filePath, metadata });
+  processQueue();
+};
 
-module.exports = queue;
+module.exports = { addToQueue };
