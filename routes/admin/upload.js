@@ -3,7 +3,8 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const { addToQueue } = require('../../utils/videoQueue');
+const { ObjectId } = require('mongodb');
+const client = require('../../utils/mongoClient'); // MongoDB-Client
 
 const uploadDir = path.join(__dirname, '../../uploads');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
@@ -34,16 +35,30 @@ router.post('/', upload.single('video'), async (req, res) => {
     return res.status(400).send('Keine Datei hochgeladen.');
   }
 
-  addToQueue(req.file.path, {
-    title,
-    description,
-    categories: categories ? categories.split(',').map(c => c.trim()) : []
-  });
+  try {
+    const db = client.db(); // Default-Datenbank
+    const queue = db.collection('videoQueue');
 
-  res.render('admin-upload', {
-    categories: getCategories(),
-    success: true
-  });
+    const categoryList = categories ? categories.split(',').map(c => c.trim()) : [];
+
+    await queue.insertOne({
+      _id: new ObjectId(),
+      filepath: req.file.path,
+      title,
+      description,
+      categories: categoryList,
+      uploadDate: new Date(),
+      status: 'pending'
+    });
+
+    res.render('admin-upload', {
+      categories: getCategories(),
+      success: true
+    });
+  } catch (err) {
+    console.error('Fehler beim Einfügen in die Warteschlange:', err);
+    res.status(500).send('Fehler beim Hochladen.');
+  }
 });
 
 module.exports = router;
