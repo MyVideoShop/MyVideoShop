@@ -98,11 +98,11 @@
   <main>
     <h1>Video hochladen</h1>
 
-<% if (typeof success !== 'undefined' && success) { %>
-  <div style="background-color:#2ecc71; padding:15px; border-radius:10px; margin-bottom:20px;">
-    Upload erfolgreich! Das Video wird im Hintergrund verarbeitet.
-  </div>
-<% } %>
+    <% if (typeof success !== 'undefined' && success) { %>
+      <div style="background-color:#2ecc71; padding:15px; border-radius:10px; margin-bottom:20px;">
+        Upload erfolgreich! Das Video wird im Hintergrund verarbeitet.
+      </div>
+    <% } %>
 
     <form action="/admin/upload" method="POST" enctype="multipart/form-data">
       <input type="text" name="title" placeholder="Videotitel" class="input-box" required />
@@ -133,6 +133,12 @@
 
       <button type="submit" class="upload-btn">Video veröffentlichen</button>
     </form>
+
+    <!-- Neue Kategorie erstellen -->
+    <form action="/admin/upload/category" method="POST" style="margin-top: 30px;">
+      <input type="text" name="newCategory" placeholder="Neue Kategorie hinzufügen" class="input-box" required />
+      <button type="submit" class="upload-btn" style="background-color:#007bff;">Kategorie erstellen</button>
+    </form>
   </main>
 
   <script>
@@ -141,8 +147,15 @@
     const hiddenInput = document.getElementById('categoriesInput');
     const selectedCategories = new Set();
 
+    const form = document.querySelector('form[action="/admin/upload"]');
+    const titleInput = form.querySelector('input[name="title"]');
+    const videoInput = form.querySelector('input[name="video"]');
+    const descriptionInput = form.querySelector('textarea[name="description"]');
+    const submitBtn = form.querySelector('button[type="submit"]');
+
     function updateHiddenInput() {
       hiddenInput.value = Array.from(selectedCategories).join(',');
+      checkFormValid();
     }
 
     function createPill(name) {
@@ -176,6 +189,19 @@
         updateHiddenInput();
       }
     });
+
+    function checkFormValid() {
+      const hasTitle = titleInput.value.trim() !== "";
+      const hasDescription = descriptionInput.value.trim() !== "";
+      const hasVideo = videoInput.files.length > 0;
+      const hasCategory = selectedCategories.size > 0;
+      submitBtn.disabled = !(hasTitle && hasDescription && hasVideo && hasCategory);
+    }
+
+    form.addEventListener('input', checkFormValid);
+    videoInput.addEventListener('change', checkFormValid);
+
+    submitBtn.disabled = true;
   </script>
 </body>
 </html>
