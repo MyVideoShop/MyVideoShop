@@ -2,7 +2,16 @@ const express = require('express');
 const session = require('express-session');
 const fs = require('fs');
 const path = require('path');
+const mongoose = require('mongoose');
+require('dotenv').config();
+
 const app = express();
+
+// MongoDB-Verbindung
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/videoApp', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(() => console.log('Mit MongoDB verbunden')).catch(console.error);
 
 // Routen
 const authRoutes = require('./routes/auth');
@@ -16,24 +25,11 @@ const adminUploadRouter = require('./routes/admin/upload');
 const statsFile = path.join(__dirname, 'data', 'visits.json');
 const supportFile = path.join(__dirname, 'data', 'supportMessages.json');
 const videosFile = path.join(__dirname, 'data', 'videos.json');
-const mongoose = require('mongoose');
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/videoApp', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-}).then(() => console.log('Mit MongoDB verbunden')).catch(console.error);
-
-require('dotenv').config();
 
 // Sicherstellen, dass Dateien vorhanden sind
-if (!fs.existsSync(statsFile)) {
-  fs.writeFileSync(statsFile, JSON.stringify({ total: 0, online: 0 }));
-}
-if (!fs.existsSync(supportFile)) {
-  fs.writeFileSync(supportFile, JSON.stringify([]));
-}
-if (!fs.existsSync(videosFile)) {
-  fs.writeFileSync(videosFile, JSON.stringify([]));
-}
+if (!fs.existsSync(statsFile)) fs.writeFileSync(statsFile, JSON.stringify({ total: 0, online: 0 }));
+if (!fs.existsSync(supportFile)) fs.writeFileSync(supportFile, JSON.stringify([]));
+if (!fs.existsSync(videosFile)) fs.writeFileSync(videosFile, JSON.stringify([]));
 
 // Automatische Löschung alter Supportnachrichten
 try {
@@ -57,11 +53,10 @@ app.use(session({
   cookie: { maxAge: 5 * 60 * 1000 }
 }));
 
-// View-Engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Besucher-Online-Zähler
+// Besucherzähler
 app.use((req, res, next) => {
   const stats = JSON.parse(fs.readFileSync(statsFile));
   if (!req.session.hasCountedOnline) {
@@ -85,7 +80,7 @@ app.use('/admin/videos', adminVideosRouter);
 app.use('/admin/upload', adminUploadRouter);
 app.use('/', authRoutes);
 
-// Startseite mit Videoliste
+// Startseite
 app.get('/', (req, res) => {
   const referer = req.get('referer');
   const localHost = `${req.protocol}://${req.get('host')}`;
@@ -100,30 +95,22 @@ app.get('/', (req, res) => {
   res.render('index', { shopName: 'ShopMyVideos', videos });
 });
 
-// Admin-Startseite
+// Admin
 app.get('/admin', (req, res) => {
   res.render('admin');
 });
-
-// Admin: Videos verwalten
-app.get('/admin/videos', (req, res) => {
-  const videos = JSON.parse(fs.readFileSync(videosFile));
-  res.render('admin-videos', { videos });
-});
-
-// Creator-Profilseite
-app.get('/creator/:name', (req, res) => {
-  const name = req.params.name;
-  res.render('creator', { name });
-});
-
-// Fehlerseite für ungültige Admin-Unterseiten
 app.get('/admin/:section', (req, res) => {
   res.status(404).send('Diese Admin-Seite existiert nicht.');
+});
+
+// Creator-Profil
+app.get('/creator/:name', (req, res) => {
+  res.render('creator', { name: req.params.name });
 });
 
 // Server starten
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server läuft auf Port ${PORT}`));
 
-require('./utils/videoQueue'); // Warteschlangen-Worker aktivieren
+// Video-Warteschlange aktivieren
+require('./utils/videoQueue');
