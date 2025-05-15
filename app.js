@@ -111,6 +111,3 @@ app.get('/creator/:name', (req, res) => {
 // Server starten
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server läuft auf Port ${PORT}`));
-
-// Video-Warteschlange aktivieren
-require('./utils/videoQueue');
