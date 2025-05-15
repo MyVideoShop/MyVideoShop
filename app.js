@@ -22,6 +22,8 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/videoApp'
   useUnifiedTopology: true
 }).then(() => console.log('Mit MongoDB verbunden')).catch(console.error);
 
+require('dotenv').config();
+
 // Sicherstellen, dass Dateien vorhanden sind
 if (!fs.existsSync(statsFile)) {
   fs.writeFileSync(statsFile, JSON.stringify({ total: 0, online: 0 }));
