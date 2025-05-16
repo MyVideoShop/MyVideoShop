@@ -2,112 +2,127 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title><%= shopName %></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= shopName %> – Startseite</title>
+  <link rel="stylesheet" href="/css/style.css" />
   <style>
-    body {
-      font-family: sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f7f7f7;
-    }
-    header {
-      background-color: #333;
-      color: white;
-      padding: 1rem;
-      text-align: center;
-    }
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    .video-grid {
+      display: flex;
+      flex-wrap: nowrap;
       gap: 20px;
-      padding: 20px;
+      overflow-x: auto;
+      padding: 1rem 0;
     }
+
     .video-box {
-      background: white;
-      border-radius: 10px;
-      padding: 15px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      min-width: 300px;
+      background: #1e1e1e;
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      transition: transform 0.2s, background-color 0.2s;
+      flex-shrink: 0;
     }
+
+    .video-box:hover {
+      background-color: #2a2a2a;
+      transform: translateY(-5px);
+    }
+
     .video-box h3 {
+      margin: 0 0 8px;
+      color: #fff;
+    }
+
+    .video-box p {
+      color: #ccc;
       margin: 0 0 10px;
     }
-    .video-box p {
-      font-size: 0.9em;
-      color: #555;
-    }
-    .video-thumbnail {
+
+    .video-wrapper {
+      position: relative;
       width: 100%;
-      height: auto;
-      border-radius: 8px;
-      cursor: pointer;
-      object-fit: cover;
-      max-height: 180px;
+      padding-bottom: 56.25%;
+      height: 0;
     }
-    #videoModal {
-      position: fixed;
+
+    .video-wrapper iframe {
+      position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0,0,0,0.95);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-    }
-    #videoModal iframe {
-      width: 80%;
-      height: 80%;
       border: none;
-    }
-    #videoModalClose {
-      position: absolute;
-      top: 20px;
-      right: 30px;
-      font-size: 30px;
-      color: white;
-      cursor: pointer;
     }
   </style>
 </head>
-<body>
+<body class="dark">
   <header>
+    <img src="/logo.avif" alt="Logo" class="logo" />
     <h1><%= shopName %></h1>
   </header>
 
-  <div class="gallery">
-    <% videos.forEach(video => { %>
-      <div class="video-box">
-        <h3><%= video.title %></h3>
-        <p><%= video.description %></p>
-        <img class="video-thumbnail" src="<%= video.thumbnail || '/placeholder.jpg' %>" 
-             data-url="<%= video.url %>" alt="Vorschaubild" />
+  <main>
+    <h2>Willkommen auf der Startseite!</h2>
+
+    <% if (videos.length === 0) { %>
+      <p>Hier werden bald Videos angezeigt...</p>
+    <% } else { %>
+      <div class="video-grid">
+        <% videos.forEach(video => { %>
+          <div class="video-box">
+            <h3><%= video.title %></h3>
+            <p><%= video.description %></p>
+            <div class="video-wrapper">
+              <iframe 
+                src="<%= video.iframeUrl %>" 
+                allowfullscreen 
+                allow="autoplay; encrypted-media">
+              </iframe>
+            </div>
+          </div>
+        <% }) %>
       </div>
-    <% }); %>
+    <% } %>
+  </main>
+
+  <button id="loginButton" class="corner-btn">Creator Login</button>
+  <button id="supportButton" class="corner-btn" style="right: 160px;">Support kontaktieren</button>
+
+  <!-- Support Modal -->
+  <div class="modal hidden" id="supportModal">
+    <div class="modal-content">
+      <h2>Supportnachricht</h2>
+      <form id="supportForm">
+        <input type="text" name="title" placeholder="Titel" required><br>
+        <textarea name="description" placeholder="Beschreibung (min. 10 Zeichen)" minlength="10" maxlength="1000" required></textarea><br>
+        <div class="modal-buttons">
+          <button type="submit">Senden</button>
+          <button type="button" id="closeSupportModal">Schließen</button>
+        </div>
+      </form>
+      <div id="supportSuccess" class="form-message"></div>
+    </div>
   </div>
 
-  <div id="videoModal">
-    <span id="videoModalClose">&times;</span>
-    <iframe src="" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+  <!-- Login Modal -->
+  <div id="loginModal" class="modal hidden">
+    <div class="modal-content">
+      <h2>Creator/Admin Login</h2>
+      <form id="loginForm">
+        <input type="text" name="name" placeholder="Name*" required />
+        <input type="email" name="email" placeholder="E-Mail (nur für Bewerbung)" />
+        <input type="password" name="password" placeholder="Passwort*" required />
+        <div id="formMessage" class="form-message"></div>
+        <div class="modal-buttons">
+          <button type="submit" name="action" value="apply">Bewerben</button>
+          <button type="submit" name="action" value="login">Einloggen</button>
+        </div>
+      </form>
+    </div>
   </div>
 
-  <script>
-    document.querySelectorAll('.video-thumbnail').forEach(img => {
-      img.addEventListener('click', () => {
-        const modal = document.getElementById('videoModal');
-        const iframe = modal.querySelector('iframe');
-        iframe.src = img.dataset.url;
-        modal.style.display = 'flex';
-      });
-    });
-
-    document.getElementById('videoModalClose').addEventListener('click', () => {
-      const modal = document.getElementById('videoModal');
-      const iframe = modal.querySelector('iframe');
-      iframe.src = '';
-      modal.style.display = 'none';
-    });
-  </script>
+  <script src="/js/script.js"></script>
+  <script src="/js/supportModal.js"></script>
 </body>
 </html>
