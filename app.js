@@ -91,8 +91,22 @@ app.get('/', (req, res) => {
     fs.writeFileSync(statsFile, JSON.stringify(stats, null, 2));
   }
 
-  const videos = JSON.parse(fs.readFileSync(videosFile));
+  const videos = JSON.parse(fs.readFileSync(videosFile)).map(video => ({
+    ...video,
+    iframeUrl: `/video/${encodeURIComponent(video.id)}`
+  }));
+
   res.render('index', { shopName: 'ShopMyVideos', videos });
+});
+
+// Video-Anzeige (versteckte Pixeldrain-URL)
+app.get('/video/:id', (req, res) => {
+  const videos = JSON.parse(fs.readFileSync(videosFile));
+  const video = videos.find(v => v.id === req.params.id);
+
+  if (!video) return res.status(404).send('Video nicht gefunden');
+
+  res.redirect(video.url);
 });
 
 // Admin
