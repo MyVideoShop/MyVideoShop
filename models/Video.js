@@ -1,16 +1,16 @@
 const mongoose = require('mongoose');
 
 const videoSchema = new mongoose.Schema({
-  title: String,
+  title: { type: String, required: true },
   description: String,
   categories: [String],
   originalFilename: String,
   status: {
     type: String,
-    enum: ['pending', 'processing', 'completed', 'failed'],
+    enum: ['pending', 'processing', 'done', 'failed'],
     default: 'pending'
   },
-  embedUrl: String,
+  url: String, // finale, versteckte Video-URL (z. B. Pixeldrain)
   createdAt: {
     type: Date,
     default: Date.now
