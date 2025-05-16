@@ -13,6 +13,9 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/videoApp'
   useUnifiedTopology: true
 }).then(() => console.log('Mit MongoDB verbunden')).catch(console.error);
 
+// Modelle
+const Video = require('./models/Video');
+
 // Routen
 const authRoutes = require('./routes/auth');
 const supportRouter = require('./routes/support');
@@ -24,12 +27,10 @@ const adminUploadRouter = require('./routes/admin/upload');
 // Datenpfade
 const statsFile = path.join(__dirname, 'data', 'visits.json');
 const supportFile = path.join(__dirname, 'data', 'supportMessages.json');
-const videosFile = path.join(__dirname, 'data', 'videos.json');
 
 // Sicherstellen, dass Dateien vorhanden sind
 if (!fs.existsSync(statsFile)) fs.writeFileSync(statsFile, JSON.stringify({ total: 0, online: 0 }));
 if (!fs.existsSync(supportFile)) fs.writeFileSync(supportFile, JSON.stringify([]));
-if (!fs.existsSync(videosFile)) fs.writeFileSync(videosFile, JSON.stringify([]));
 
 // Automatische Löschung alter Supportnachrichten
 try {
@@ -80,8 +81,8 @@ app.use('/admin/videos', adminVideosRouter);
 app.use('/admin/upload', adminUploadRouter);
 app.use('/', authRoutes);
 
-// Startseite
-app.get('/', (req, res) => {
+// Startseite mit MongoDB-Videos
+app.get('/', async (req, res) => {
   const referer = req.get('referer');
   const localHost = `${req.protocol}://${req.get('host')}`;
 
@@ -91,22 +92,30 @@ app.get('/', (req, res) => {
     fs.writeFileSync(statsFile, JSON.stringify(stats, null, 2));
   }
 
-  const videos = JSON.parse(fs.readFileSync(videosFile)).map(video => ({
-    ...video,
-    iframeUrl: `/video/${encodeURIComponent(video.id)}`
-  }));
-
-  res.render('index', { shopName: 'ShopMyVideos', videos });
+  try {
+    const videos = await Video.find({ status: 'done' }).lean();
+    const formatted = videos.map(v => ({
+      id: v._id.toString(),
+      title: v.title,
+      description: v.description,
+      iframeUrl: `/video/${v._id}`
+    }));
+    res.render('index', { shopName: 'ShopMyVideos', videos: formatted });
+  } catch (err) {
+    console.error('Fehler beim Laden der Videos:', err);
+    res.render('index', { shopName: 'ShopMyVideos', videos: [] });
+  }
 });
 
-// Video-Anzeige (versteckte Pixeldrain-URL)
-app.get('/video/:id', (req, res) => {
-  const videos = JSON.parse(fs.readFileSync(videosFile));
-  const video = videos.find(v => v.id === req.params.id);
-
-  if (!video) return res.status(404).send('Video nicht gefunden');
-
-  res.redirect(video.url);
+// Versteckte Video-Proxy-Route
+app.get('/video/:id', async (req, res) => {
+  try {
+    const video = await Video.findById(req.params.id);
+    if (!video || !video.url) return res.status(404).send('Video nicht gefunden');
+    res.redirect(video.url);
+  } catch (err) {
+    res.status(500).send('Fehler beim Weiterleiten des Videos');
+  }
 });
 
 // Admin
