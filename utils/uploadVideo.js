@@ -1,36 +1,31 @@
-// utils/uploadVideo.js
+// utils/uploadVideos.js
+const B2 = require('backblaze-b2');
 const fs = require('fs');
 const path = require('path');
-const AWS = require('aws-sdk');
 
-const b2 = new AWS.S3({
-  endpoint: new AWS.Endpoint(`https://s3.${process.env.B2_BUCKET_REGION}.backblazeb2.com`),
-  accessKeyId: process.env.B2_KEY_ID,
-  secretAccessKey: process.env.B2_APPLICATION_KEY,
-  region: process.env.B2_BUCKET_REGION,
-  signatureVersion: 'v4',
+const b2 = new B2({
+  applicationKeyId: process.env.B2_KEY_ID,
+  applicationKey: process.env.B2_APP_KEY,
 });
 
-async function uploadVideoToB2(localFilePath, remoteFilename) {
-  const fileStream = fs.createReadStream(localFilePath);
-  const params = {
-    Bucket: process.env.B2_BUCKET_NAME,
-    Key: `uploads/${remoteFilename}`, // z. B. uploads/video123.mp4
-    Body: fileStream,
-    ContentType: 'video/mp4',
-    ACL: 'private', // oder 'public-read' falls öffentlich
-  };
+async function uploadVideo(filePath, fileName) {
+  try {
+    await b2.authorize();
+    const uploadUrlResponse = await b2.getUploadUrl({ bucketId: process.env.B2_BUCKET_ID });
 
-  return new Promise((resolve, reject) => {
-    b2.upload(params, (err, data) => {
-      if (err) {
-        console.error('Fehler beim Upload zu B2:', err);
-        return reject(err);
-      }
-      console.log('Upload erfolgreich:', data.Location);
-      resolve(data.Location);
+    const fileData = fs.readFileSync(filePath);
+    const uploadResponse = await b2.uploadFile({
+      uploadUrl: uploadUrlResponse.data.uploadUrl,
+      uploadAuthToken: uploadUrlResponse.data.authorizationToken,
+      fileName: fileName,
+      data: fileData,
     });
-  });
+
+    return uploadResponse.data.fileId;
+  } catch (error) {
+    console.error('Fehler beim Hochladen des Videos:', error);
+    throw error;
+  }
 }
 
-module.exports = uploadVideoToB2;
+module.exports = { uploadVideo };
