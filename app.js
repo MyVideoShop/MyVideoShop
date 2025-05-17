@@ -10,35 +10,35 @@ const app = express();
 // MongoDB-Verbindung
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/videoApp', {
   useNewUrlParser: true,
-  useUnifiedTopology: true
+  useUnifiedTopology: true,
 }).then(() => console.log('Mit MongoDB verbunden')).catch(console.error);
 
-// Modelle
+// Modelle laden
 const Video = require('./models/Video');
 
-// Routen
+// Routen laden
 const authRoutes = require('./routes/auth');
 const supportRouter = require('./routes/support');
 const adminSupportRouter = require('./routes/admin/support');
 const adminStatsRouter = require('./routes/admin/stats');
 const adminVideosRouter = require('./routes/admin/videos');
-const adminUploadRouter = require('./routes/admin/upload');
+const adminUploadRouter = require('./routes/admin/upload'); // <-- Upload-Route
 
-// Datenpfade
+// Daten-Dateipfade
 const statsFile = path.join(__dirname, 'data', 'visits.json');
 const supportFile = path.join(__dirname, 'data', 'supportMessages.json');
 
-// Sicherstellen, dass Dateien vorhanden sind
+// Sicherstellen, dass die Dateien vorhanden sind
 if (!fs.existsSync(statsFile)) fs.writeFileSync(statsFile, JSON.stringify({ total: 0, online: 0 }));
 if (!fs.existsSync(supportFile)) fs.writeFileSync(supportFile, JSON.stringify([]));
 
-// Automatische Löschung alter Supportnachrichten
+// Alte Supportnachrichten regelmäßig löschen
 try {
   const SupportMessage = require('./models/SupportMessage');
   setInterval(async () => {
     const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     await SupportMessage.deleteMany({ createdAt: { $lt: weekAgo } });
-  }, 6 * 60 * 60 * 1000);
+  }, 6 * 60 * 60 * 1000); // Alle 6 Stunden
 } catch {
   console.warn('SupportMessage-Modell nicht gefunden – automatische Löschung deaktiviert');
 }
@@ -51,13 +51,14 @@ app.use(session({
   secret: 'geheimnis123',
   resave: false,
   saveUninitialized: true,
-  cookie: { maxAge: 5 * 60 * 1000 }
+  cookie: { maxAge: 5 * 60 * 1000 },
 }));
 
+// EJS-Vorlagen
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Besucherzähler
+// Besucherzähler-Middleware
 app.use((req, res, next) => {
   const stats = JSON.parse(fs.readFileSync(statsFile));
   if (!req.session.hasCountedOnline) {
@@ -73,15 +74,15 @@ app.use((req, res, next) => {
   next();
 });
 
-// Routen registrieren
+// Routenregistrierung
 app.use('/support', supportRouter);
 app.use('/admin/support', adminSupportRouter);
 app.use('/admin/stats', adminStatsRouter);
 app.use('/admin/videos', adminVideosRouter);
-app.use('/admin/upload', adminUploadRouter);
+app.use('/admin/upload', adminUploadRouter); // <-- Upload-Route aktiv
 app.use('/', authRoutes);
 
-// Startseite mit MongoDB-Videos
+// Startseite mit allen Videos (öffentlich)
 app.get('/', async (req, res) => {
   const referer = req.get('referer');
   const localHost = `${req.protocol}://${req.get('host')}`;
@@ -98,7 +99,7 @@ app.get('/', async (req, res) => {
       id: v._id.toString(),
       title: v.title,
       description: v.description,
-      iframeUrl: `/video/${v._id}`
+      iframeUrl: `/video/${v._id}`,
     }));
     res.render('index', { shopName: 'ShopMyVideos', videos: formatted });
   } catch (err) {
@@ -107,7 +108,7 @@ app.get('/', async (req, res) => {
   }
 });
 
-// Versteckte Video-Proxy-Route
+// Video weiterleiten (als Proxy)
 app.get('/video/:id', async (req, res) => {
   try {
     const video = await Video.findById(req.params.id);
@@ -118,19 +119,21 @@ app.get('/video/:id', async (req, res) => {
   }
 });
 
-// Admin
+// Admin Startseite
 app.get('/admin', (req, res) => {
   res.render('admin');
 });
+
+// Fehlerseite für nicht existierende Admin-Seiten
 app.get('/admin/:section', (req, res) => {
   res.status(404).send('Diese Admin-Seite existiert nicht.');
 });
 
-// Creator-Profil
+// Creator-Profilseite
 app.get('/creator/:name', (req, res) => {
   res.render('creator', { name: req.params.name });
 });
 
-// Server starten
+// Serverstart
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server läuft auf Port ${PORT}`));
