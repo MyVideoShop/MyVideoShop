@@ -8,16 +8,14 @@ const b2 = new B2({
   applicationKey: process.env.B2_APPLICATION_KEY
 });
 
-// Authentifiziere dich sofort beim Laden der Datei
-async function authorizeB2() {
+async function connectToBackblaze() {
   try {
     await b2.authorize();
     console.log('✅ Mit Backblaze B2 verbunden.');
   } catch (error) {
     console.error('❌ Fehler beim Verbinden mit Backblaze B2:', error.message);
+    throw error;
   }
 }
 
-authorizeB2();
-
-module.exports = b2;
+module.exports = { b2, connectToBackblaze };
