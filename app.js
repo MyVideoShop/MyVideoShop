@@ -7,43 +7,49 @@ require('dotenv').config();
 
 const app = express();
 
-// MongoDB-Verbindung
+// === MongoDB-Verbindung ===
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/videoApp', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-}).then(() => console.log('Mit MongoDB verbunden')).catch(console.error);
+}).then(() => console.log('✅ Mit MongoDB verbunden'))
+  .catch(err => console.error('❌ Fehler bei MongoDB-Verbindung:', err));
 
-// Modelle laden
+// === Backblaze B2-Verbindung testen ===
+const { connectToBackblaze } = require('./utils/b2'); // <-- Funktion muss exportiert sein
+connectToBackblaze()
+  .then(() => console.log('✅ Mit Backblaze B2 verbunden'))
+  .catch(err => console.error('❌ Fehler bei der Verbindung zu Backblaze B2:', err));
+
+// === Modelle laden ===
 const Video = require('./models/Video');
 
-// Routen laden
+// === Routen laden ===
 const authRoutes = require('./routes/auth');
 const supportRouter = require('./routes/support');
 const adminSupportRouter = require('./routes/admin/support');
 const adminStatsRouter = require('./routes/admin/stats');
 const adminVideosRouter = require('./routes/admin/videos');
-const adminUploadRouter = require('./routes/admin/upload'); // <-- Upload-Route
+const adminUploadRouter = require('./routes/admin/upload');
 
-// Daten-Dateipfade
+// === Daten-Dateien ===
 const statsFile = path.join(__dirname, 'data', 'visits.json');
 const supportFile = path.join(__dirname, 'data', 'supportMessages.json');
 
-// Sicherstellen, dass die Dateien vorhanden sind
 if (!fs.existsSync(statsFile)) fs.writeFileSync(statsFile, JSON.stringify({ total: 0, online: 0 }));
 if (!fs.existsSync(supportFile)) fs.writeFileSync(supportFile, JSON.stringify([]));
 
-// Alte Supportnachrichten regelmäßig löschen
+// Alte Supportnachrichten löschen
 try {
   const SupportMessage = require('./models/SupportMessage');
   setInterval(async () => {
     const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     await SupportMessage.deleteMany({ createdAt: { $lt: weekAgo } });
-  }, 6 * 60 * 60 * 1000); // Alle 6 Stunden
+  }, 6 * 60 * 60 * 1000);
 } catch {
-  console.warn('SupportMessage-Modell nicht gefunden – automatische Löschung deaktiviert');
+  console.warn('⚠️ SupportMessage-Modell nicht gefunden – automatische Löschung deaktiviert');
 }
 
-// Middleware
+// === Middleware ===
 app.use(express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -54,11 +60,11 @@ app.use(session({
   cookie: { maxAge: 5 * 60 * 1000 },
 }));
 
-// EJS-Vorlagen
+// === EJS-Vorlagen ===
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Besucherzähler-Middleware
+// === Besucherzähler ===
 app.use((req, res, next) => {
   const stats = JSON.parse(fs.readFileSync(statsFile));
   if (!req.session.hasCountedOnline) {
@@ -74,15 +80,15 @@ app.use((req, res, next) => {
   next();
 });
 
-// Routenregistrierung
+// === Routen ===
 app.use('/support', supportRouter);
 app.use('/admin/support', adminSupportRouter);
 app.use('/admin/stats', adminStatsRouter);
 app.use('/admin/videos', adminVideosRouter);
-app.use('/admin/upload', adminUploadRouter); // <-- Upload-Route aktiv
+app.use('/admin/upload', adminUploadRouter);
 app.use('/', authRoutes);
 
-// Startseite mit allen Videos (öffentlich)
+// === Startseite ===
 app.get('/', async (req, res) => {
   const referer = req.get('referer');
   const localHost = `${req.protocol}://${req.get('host')}`;
@@ -108,7 +114,7 @@ app.get('/', async (req, res) => {
   }
 });
 
-// Video weiterleiten (als Proxy)
+// === Video-Proxy ===
 app.get('/video/:id', async (req, res) => {
   try {
     const video = await Video.findById(req.params.id);
@@ -119,21 +125,11 @@ app.get('/video/:id', async (req, res) => {
   }
 });
 
-// Admin Startseite
-app.get('/admin', (req, res) => {
-  res.render('admin');
-});
+// === Admin-UI ===
+app.get('/admin', (req, res) => res.render('admin'));
+app.get('/admin/:section', (req, res) => res.status(404).send('Diese Admin-Seite existiert nicht.'));
+app.get('/creator/:name', (req, res) => res.render('creator', { name: req.params.name }));
 
-// Fehlerseite für nicht existierende Admin-Seiten
-app.get('/admin/:section', (req, res) => {
-  res.status(404).send('Diese Admin-Seite existiert nicht.');
-});
-
-// Creator-Profilseite
-app.get('/creator/:name', (req, res) => {
-  res.render('creator', { name: req.params.name });
-});
-
-// Serverstart
+// === Serverstart ===
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server läuft auf Port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server läuft auf Port ${PORT}`));
