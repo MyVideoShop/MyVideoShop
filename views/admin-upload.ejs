@@ -88,6 +88,27 @@
     .category-pill.selected {
       background-color: #007bff;
     }
+
+    .alert {
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .alert-success {
+      background-color: #2ecc71;
+      color: white;
+    }
+
+    .alert-error {
+      background-color: #e74c3c;
+      color: white;
+    }
+
+    .alert-info {
+      background-color: #3498db;
+      color: white;
+    }
   </style>
 </head>
 <body class="dark">
@@ -98,10 +119,18 @@
   <main>
     <h1>Video hochladen</h1>
 
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert alert-error"><%= error %></div>
+    <% } %>
+
     <% if (typeof success !== 'undefined' && success) { %>
-      <div style="background-color:#2ecc71; padding:15px; border-radius:10px; margin-bottom:20px;">
+      <div class="alert alert-success">
         Upload erfolgreich! Das Video wird im Hintergrund verarbeitet.
       </div>
+    <% } %>
+
+    <% if (typeof message !== 'undefined' && message) { %>
+      <div class="alert alert-info"><%= message %></div>
     <% } %>
 
     <form action="/admin/upload" method="POST" enctype="multipart/form-data">
