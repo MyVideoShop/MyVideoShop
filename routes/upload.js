@@ -57,7 +57,7 @@ router.post('/upload', upload.single('video'), async (req, res) => {
 
     // Schritt 3: B2 Autorisierung
     logs.push('🔐 Authentifiziere bei B2...');
-    const b2Auth = Buffer.from(`${process.env.B2_ACCOUNT_ID}:${process.env.B2_APP_KEY}`).toString('base64');
+    const b2Auth = Buffer.from(`${process.env.B2_ACCOUNT_ID}:${process.env.B2_APPLICATION_KEY}`).toString('base64');
     const authRes = await axios.get('https://api.backblazeb2.com/b2api/v2/b2_authorize_account', {
       headers: { Authorization: `Basic ${b2Auth}` },
     });
