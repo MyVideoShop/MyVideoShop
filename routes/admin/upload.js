@@ -6,40 +6,62 @@ const fs = require('fs');
 const { ObjectId } = require('mongodb');
 const client = require('../../utils/mongoClient');
 
+// Upload-Verzeichnis
 const uploadDir = path.join(__dirname, '../../uploads');
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+  console.log('✅ Upload-Verzeichnis erstellt:', uploadDir);
+}
 
+// Multer-Konfiguration
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
+  filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname),
 });
 const upload = multer({ storage });
 
+// Kategorien einlesen
 const getCategories = () => {
   const file = path.join(__dirname, '../../data/categories.json');
   return fs.existsSync(file) ? JSON.parse(fs.readFileSync(file)) : [];
 };
 
-// GET Upload-Seite
+// Upload-Seite (GET)
 router.get('/', (req, res) => {
-  res.render('admin-upload', { categories: getCategories(), success: false });
+  res.render('admin-upload', {
+    categories: getCategories(),
+    success: false,
+    error: null,
+    message: null
+  });
 });
 
-// POST Video-Upload
+// Video-Upload (POST)
 router.post('/', upload.single('video'), async (req, res) => {
   const { title, description, categories } = req.body;
+  const logs = [];
 
   if (!req.file) {
-    return res.status(400).send('Keine Datei hochgeladen.');
+    const error = '❌ Keine Datei hochgeladen.';
+    console.error(error);
+    return res.render('admin-upload', {
+      categories: getCategories(),
+      success: false,
+      error,
+      message: null
+    });
   }
 
   try {
+    logs.push('✅ Datei empfangen:', req.file.filename);
     const db = client.db();
     const queue = db.collection('videoQueue');
 
-    const categoryList = categories ? categories.split(',').map(c => c.trim()) : [];
+    const categoryList = categories
+      ? categories.split(',').map((c) => c.trim()).filter(Boolean)
+      : [];
 
-    await queue.insertOne({
+    const videoData = {
       _id: new ObjectId(),
       filepath: req.file.path,
       title,
@@ -47,26 +69,42 @@ router.post('/', upload.single('video'), async (req, res) => {
       categories: categoryList,
       uploadDate: new Date(),
       status: 'pending'
-    });
+    };
+
+    logs.push('📥 In Warteschlange einfügen:', videoData);
+
+    await queue.insertOne(videoData);
+    logs.push('✅ Erfolgreich in die Datenbank-Warteschlange eingefügt.');
 
     res.render('admin-upload', {
       categories: getCategories(),
-      success: true
+      success: true,
+      error: null,
+      message: `Video "${title}" erfolgreich hochgeladen.`,
     });
   } catch (err) {
-    console.error('Fehler beim Einfügen in die Warteschlange:', err);
-    res.status(500).send('Fehler beim Hochladen.');
+    const errorMsg = '❌ Fehler beim Einfügen in die Warteschlange: ' + err.message;
+    console.error(errorMsg);
+    res.render('admin-upload', {
+      categories: getCategories(),
+      success: false,
+      error: errorMsg,
+      message: null,
+    });
   }
 });
 
-// POST Neue Kategorie anlegen
+// Neue Kategorie hinzufügen
 router.post('/category', (req, res) => {
   const newCategory = (req.body.newCategory || '').trim();
-  if (!newCategory) return res.redirect('/admin/upload');
-
   const file = path.join(__dirname, '../../data/categories.json');
-  let categories = [];
 
+  if (!newCategory) {
+    console.warn('⚠️ Leere Kategorie wurde eingereicht.');
+    return res.redirect('/admin/upload');
+  }
+
+  let categories = [];
   if (fs.existsSync(file)) {
     categories = JSON.parse(fs.readFileSync(file));
   }
@@ -74,6 +112,9 @@ router.post('/category', (req, res) => {
   if (!categories.includes(newCategory)) {
     categories.push(newCategory);
     fs.writeFileSync(file, JSON.stringify(categories, null, 2));
+    console.log('✅ Neue Kategorie hinzugefügt:', newCategory);
+  } else {
+    console.log('ℹ️ Kategorie existiert bereits:', newCategory);
   }
 
   res.redirect('/admin/upload');
