@@ -4,8 +4,9 @@ const path = require('path');
 const multer = require('multer');
 const crypto = require('crypto');
 const ffmpeg = require('fluent-ffmpeg');
-const axios = require('axios');
 require('dotenv').config();
+
+const { b2, connectToBackblaze } = require('../utils/b2');
 
 const router = express.Router();
 
@@ -28,7 +29,7 @@ router.post('/upload', upload.single('video'), async (req, res) => {
   }
 
   try {
-    // Schritt 1: Video komprimieren
+    // Schritt 1: Komprimieren
     logs.push('🔄 Starte Komprimierung...');
     await new Promise((resolve, reject) => {
       ffmpeg(inputPath)
@@ -50,49 +51,37 @@ router.post('/upload', upload.single('video'), async (req, res) => {
         .save(outputPath);
     });
 
-    // Schritt 2: Datei vorbereiten
-    logs.push('📦 Datei wird geladen und gehasht...');
+    logs.push('📦 Lade Datei und berechne SHA1...');
     const fileBuffer = fs.readFileSync(outputPath);
     const sha1 = crypto.createHash('sha1').update(fileBuffer).digest('hex');
 
-    // Schritt 3: B2 Autorisierung
-    logs.push('🔐 Authentifiziere bei B2...');
-    const b2Auth = Buffer.from(`${process.env.B2_ACCOUNT_ID}:${process.env.B2_APPLICATION_KEY}`).toString('base64');
-    const authRes = await axios.get('https://api.backblazeb2.com/b2api/v2/b2_authorize_account', {
-      headers: { Authorization: `Basic ${b2Auth}` },
-    });
-    const { authorizationToken, apiUrl, downloadUrl } = authRes.data;
-    logs.push('✅ Autorisierung erfolgreich.');
+    // Schritt 2: Authentifizierung (falls nötig)
+    if (!b2.authorizationToken) {
+      logs.push('🔐 Authentifiziere bei B2...');
+      await connectToBackblaze();
+    }
 
-    // Schritt 4: Upload-URL holen
+    // Schritt 3: Upload-URL holen
     logs.push('🌐 Hole Upload-URL...');
-    const uploadUrlRes = await axios.post(`${apiUrl}/b2api/v2/b2_get_upload_url`, {
-      bucketId: process.env.B2_BUCKET_ID,
-    }, {
-      headers: { Authorization: authorizationToken },
-    });
+    const uploadUrlRes = await b2.getUploadUrl({ bucketId: process.env.B2_BUCKET_ID });
     const { uploadUrl, authorizationToken: uploadAuthToken } = uploadUrlRes.data;
     logs.push('✅ Upload-URL erhalten.');
 
-    // Schritt 5: Datei hochladen
-    logs.push('📤 Lade Datei zu Backblaze B2 hoch...');
-    await axios.post(uploadUrl, fileBuffer, {
-      headers: {
-        Authorization: uploadAuthToken,
-        'X-Bz-File-Name': encodeURIComponent(outputFilename),
-        'Content-Type': 'b2/x-auto',
-        'Content-Length': fileBuffer.length,
-        'X-Bz-Content-Sha1': sha1,
-      },
-      maxBodyLength: Infinity,
-      maxContentLength: Infinity,
+    // Schritt 4: Datei hochladen
+    logs.push('📤 Lade Datei hoch...');
+    await b2.uploadFile({
+      uploadUrl,
+      uploadAuthToken,
+      fileName: outputFilename,
+      data: fileBuffer,
+      contentType: 'b2/x-auto',
+      hash: sha1,
     });
-    logs.push('✅ Datei erfolgreich hochgeladen.');
+    logs.push('✅ Upload erfolgreich.');
 
-    const publicUrl = `${downloadUrl}/file/${process.env.B2_BUCKET_NAME}/${encodeURIComponent(outputFilename)}`;
+    const publicUrl = `https://f000.backblazeb2.com/file/${process.env.B2_BUCKET_NAME}/${encodeURIComponent(outputFilename)}`;
     logs.push('🔗 Öffentliche URL: ' + publicUrl);
 
-    // Aufräumen
     fs.unlinkSync(inputPath);
     fs.unlinkSync(outputPath);
     logs.push('🧹 Temporäre Dateien gelöscht.');
