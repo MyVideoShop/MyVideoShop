@@ -1,66 +1,97 @@
 const express = require('express');
-const router = express.Router();
-const multer = require('multer');
-const path = require('path');
-const { v4: uuidv4 } = require('uuid');
 const fs = require('fs');
-const { MongoClient } = require('mongodb');
-const { uploadVideo } = require('../utils/uploadVideos');
+const path = require('path');
+const multer = require('multer');
+const crypto = require('crypto');
+const ffmpeg = require('fluent-ffmpeg');
+const axios = require('axios');
+require('dotenv').config();
 
-const mongoUri = process.env.MONGODB_URI;
-const client = new MongoClient(mongoUri);
-const dbName = process.env.MONGODB_DB_NAME || 'videoshop';
+const router = express.Router();
 
+// Multer Konfiguration
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const uploadPath = path.join(__dirname, '..', 'temp');
-    if (!fs.existsSync(uploadPath)) fs.mkdirSync(uploadPath);
-    cb(null, uploadPath);
+  destination: (req, file, cb) => {
+    cb(null, 'temp/');
   },
-  filename: function (req, file, cb) {
-    const ext = path.extname(file.originalname);
-    const filename = `${uuidv4()}${ext}`;
-    cb(null, filename);
-  }
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + '-' + file.originalname);
+  },
 });
-const upload = multer({ storage: storage });
+const upload = multer({ storage });
 
-router.post('/', upload.single('videoFile'), async (req, res) => {
-  const { title, description, categories } = req.body;
-  const filePath = req.file.path;
-  const originalName = req.file.originalname;
-  const fileName = req.file.filename;
-
-  if (!title || !description || !categories || !filePath) {
-    return res.status(400).send('Alle Felder sind erforderlich.');
-  }
+// Video-Upload-Route
+router.post('/upload', upload.single('video'), async (req, res) => {
+  const inputPath = req.file.path;
+  const outputFilename = 'compressed-' + req.file.filename;
+  const outputPath = path.join('temp', outputFilename);
 
   try {
-    await client.connect();
-    const db = client.db(dbName);
-    const queue = db.collection('videoQueue');
-
-    // ⬆️ Hochladen zu Backblaze B2
-    await uploadVideo(filePath, fileName);
-
-    // ⬇️ In Queue eintragen
-    await queue.insertOne({
-      title,
-      description,
-      categories: Array.isArray(categories) ? categories : [categories],
-      fileName,
-      originalName,
-      status: 'pending',
-      createdAt: new Date()
+    // Schritt 1: Video komprimieren
+    await new Promise((resolve, reject) => {
+      ffmpeg(inputPath)
+        .outputOptions([
+          '-vcodec libx264',
+          '-crf 28',
+          '-preset veryfast',
+          '-acodec aac',
+          '-b:a 128k',
+        ])
+        .on('end', resolve)
+        .on('error', reject)
+        .save(outputPath);
     });
 
-    // 🧹 Temporäre Datei löschen
-    fs.unlinkSync(filePath);
+    // Schritt 2: Datei lesen
+    const fileBuffer = fs.readFileSync(outputPath);
+    const sha1 = crypto.createHash('sha1').update(fileBuffer).digest('hex');
+    const fileName = outputFilename;
 
-    res.redirect('/admin/upload?success=1');
+    // Schritt 3: Authentifizieren bei Backblaze B2
+    const b2Auth = Buffer.from(`${process.env.B2_ACCOUNT_ID}:${process.env.B2_APP_KEY}`).toString('base64');
+    const authRes = await axios.get('https://api.backblazeb2.com/b2api/v2/b2_authorize_account', {
+      headers: {
+        Authorization: `Basic ${b2Auth}`,
+      },
+    });
+
+    const { authorizationToken, apiUrl, downloadUrl } = authRes.data;
+
+    // Schritt 4: Upload-URL holen
+    const uploadUrlRes = await axios.post(`${apiUrl}/b2api/v2/b2_get_upload_url`, {
+      bucketId: process.env.B2_BUCKET_ID,
+    }, {
+      headers: {
+        Authorization: authorizationToken,
+      },
+    });
+
+    const { uploadUrl, authorizationToken: uploadAuthToken } = uploadUrlRes.data;
+
+    // Schritt 5: Datei hochladen
+    await axios.post(uploadUrl, fileBuffer, {
+      headers: {
+        Authorization: uploadAuthToken,
+        'X-Bz-File-Name': encodeURIComponent(fileName),
+        'Content-Type': 'b2/x-auto',
+        'Content-Length': fileBuffer.length,
+        'X-Bz-Content-Sha1': sha1,
+      },
+      maxBodyLength: Infinity,
+      maxContentLength: Infinity,
+    });
+
+    // Schritt 6: Öffentliche URL erzeugen
+    const publicUrl = `${downloadUrl}/file/${process.env.B2_BUCKET_NAME}/${encodeURIComponent(fileName)}`;
+
+    // Aufräumen
+    fs.unlinkSync(inputPath);
+    fs.unlinkSync(outputPath);
+
+    res.json({ success: true, url: publicUrl });
   } catch (error) {
-    console.error('Fehler beim Video-Upload:', error);
-    res.status(500).send('Fehler beim Upload');
+    console.error('Fehler beim Hochladen:', error.response?.data || error.message);
+    res.status(500).json({ success: false, error: 'Upload fehlgeschlagen' });
   }
 });
 
