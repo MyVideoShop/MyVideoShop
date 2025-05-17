@@ -5,7 +5,7 @@ dotenv.config();
 
 const b2 = new B2({
   applicationKeyId: process.env.B2_KEY_ID,
-  applicationKey: process.env.B2_APPLICATION_Key
+  applicationKey: process.env.B2_APPLICATION_KEY
 });
 
 // Authentifiziere dich sofort beim Laden der Datei
