@@ -1,55 +1,48 @@
-// utils/b2.js
-const B2 = require('backblaze-b2');
-const fs = require('fs');
-const path = require('path');
-const dotenv = require('dotenv');
-dotenv.config();
-
-const b2 = new B2({
-  applicationKeyId: process.env.B2_KEY_ID,
-  applicationKey: process.env.B2_APPLICATION_KEY
-});
-
-async function connectToBackblaze() {
-  try {
-    await b2.authorize();
-    console.log('✅ Mit Backblaze B2 verbunden.');
-  } catch (error) {
-    console.error('❌ Fehler beim Verbinden mit Backblaze B2:', error.message);
-    throw error;
-  }
-}
-
 async function uploadFileToB2(localFilePath, remoteFileName, logs = []) {
   try {
+    logs.push("🚀 Starte Upload zu Backblaze...");
+
     await connectToBackblaze();
 
+    logs.push("🔍 Lese Datei: " + localFilePath);
+    if (!fs.existsSync(localFilePath)) {
+      throw new Error("Datei nicht gefunden: " + localFilePath);
+    }
+
     const bucketName = process.env.B2_BUCKET_NAME;
+    logs.push("📦 Lade Bucket-Info für: " + bucketName);
     const bucketResponse = await b2.getBucket({ bucketName });
-    const bucketId = bucketResponse.data.buckets[0].bucketId;
+    const bucketId = bucketResponse.data.buckets[0]?.bucketId;
+
+    if (!bucketId) {
+      throw new Error("❌ Kein Bucket gefunden mit dem Namen: " + bucketName);
+    }
 
     const fileData = fs.readFileSync(localFilePath);
     const stats = fs.statSync(localFilePath);
-    const contentType = 'video/mp4'; // oder dynamisch setzen, wenn nötig
+    const contentType = 'video/mp4';
 
+    logs.push("🌐 Hole Upload-URL...");
     const uploadUrlResponse = await b2.getUploadUrl({ bucketId });
 
+    logs.push("📤 Starte Datei-Upload...");
     const uploadResponse = await b2.uploadFile({
       uploadUrl: uploadUrlResponse.data.uploadUrl,
       uploadAuthToken: uploadUrlResponse.data.authorizationToken,
-      fileName: `Videos/${remoteFileName}`, // in Unterordner "Videos/"
+      fileName: `Videos/${remoteFileName}`,
       data: fileData,
       contentLength: stats.size,
       contentType
     });
 
     const fileUrl = `https://f000.backblazeb2.com/file/${bucketName}/Videos/${remoteFileName}`;
-    logs.push(`✅ Hochgeladen zu B2: ${fileUrl}`);
+    logs.push(`✅ Video erfolgreich hochgeladen: ${fileUrl}`);
+
     return fileUrl;
-  } catch (error) {
-    logs.push(`❌ Fehler beim Upload zu B2: ${error.message}`);
-    throw error;
+
+  } catch (err) {
+    logs.push("❌ Fehler beim Hochladen zu Backblaze: " + err.message);
+    console.error("❌ Backblaze Upload Error:", err.stack);
+    throw err;
   }
 }
-
-module.exports = { b2, connectToBackblaze, uploadFileToB2 };
