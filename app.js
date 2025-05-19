@@ -20,6 +20,8 @@ const supportFile = path.join(__dirname, 'data', 'supportMessages.json');
 if (!fs.existsSync(statsFile)) fs.writeFileSync(statsFile, JSON.stringify({ total: 0, online: 0 }));
 if (!fs.existsSync(supportFile)) fs.writeFileSync(supportFile, JSON.stringify([]));
 
+res.render('index', { shopName: 'MyVideoShop' });
+
 // Alte Supportnachrichten löschen
 try {
   const SupportMessage = require('./models/SupportMessage');
