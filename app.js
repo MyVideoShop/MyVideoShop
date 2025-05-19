@@ -7,29 +7,12 @@ require('dotenv').config();
 
 const app = express();
 
-// === MongoDB-Verbindung ===
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/videoApp', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-}).then(() => console.log('✅ Mit MongoDB verbunden'))
-  .catch(err => console.error('❌ Fehler bei MongoDB-Verbindung:', err));
-
-// === Backblaze B2-Verbindung testen ===
-const { connectToBackblaze } = require('./utils/b2'); // <-- Funktion muss exportiert sein
-connectToBackblaze()
-  .then(() => console.log('✅ Mit Backblaze B2 verbunden'))
-  .catch(err => console.error('❌ Fehler bei der Verbindung zu Backblaze B2:', err));
-
-// === Modelle laden ===
-const Video = require('./models/Video');
-
+/
 // === Routen laden ===
 const authRoutes = require('./routes/auth');
 const supportRouter = require('./routes/support');
 const adminSupportRouter = require('./routes/admin/support');
 const adminStatsRouter = require('./routes/admin/stats');
-const adminVideosRouter = require('./routes/admin/videos');
-const adminUploadRouter = require('./routes/admin/upload');
 
 // === Daten-Dateien ===
 const statsFile = path.join(__dirname, 'data', 'visits.json');
@@ -84,8 +67,6 @@ app.use((req, res, next) => {
 app.use('/support', supportRouter);
 app.use('/admin/support', adminSupportRouter);
 app.use('/admin/stats', adminStatsRouter);
-app.use('/admin/videos', adminVideosRouter);
-app.use('/admin/upload', adminUploadRouter);
 app.use('/', authRoutes);
 
 // === Startseite ===
@@ -107,21 +88,10 @@ app.get('/', async (req, res) => {
       description: v.description,
       iframeUrl: `/video/${v._id}`,
     }));
-    res.render('index', { shopName: 'ShopMyVideos', videos: formatted });
+    res.render('index', { shopName: 'MyVideoShop', videos: formatted });
   } catch (err) {
     console.error('Fehler beim Laden der Videos:', err);
-    res.render('index', { shopName: 'ShopMyVideos', videos: [] });
-  }
-});
-
-// === Video-Proxy ===
-app.get('/video/:id', async (req, res) => {
-  try {
-    const video = await Video.findById(req.params.id);
-    if (!video || !video.url) return res.status(404).send('Video nicht gefunden');
-    res.redirect(video.url);
-  } catch (err) {
-    res.status(500).send('Fehler beim Weiterleiten des Videos');
+    res.render('index', { shopName: 'MyVideoShop', videos: [] });
   }
 });
 
