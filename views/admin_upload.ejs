@@ -9,16 +9,16 @@
       padding: 2rem;
     }
 
-    .upload-box, .preview-box {
+    .upload-box, .description-box, .categories-box {
       background-color: #1e1e1e;
       border-radius: 12px;
       padding: 1.5rem;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
       box-shadow: 0 4px 8px rgba(0,0,0,0.4);
       transition: transform 0.2s, box-shadow 0.2s;
     }
 
-    .upload-box:hover, .preview-box:hover {
+    .upload-box:hover, .description-box:hover, .categories-box:hover {
       transform: translateY(-5px);
       box-shadow: 0 6px 12px rgba(0,0,0,0.6);
       background-color: #2a2a2a;
@@ -29,7 +29,7 @@
       border-radius: 8px;
       padding: 2rem;
       text-align: center;
-      margin: 1.5rem 0;
+      margin: 1rem 0;
       cursor: pointer;
       transition: all 0.3s;
     }
@@ -53,6 +53,8 @@
       font-weight: bold;
       cursor: pointer;
       transition: background 0.3s;
+      margin-top: 1rem;
+      width: 100%;
     }
 
     #uploadBtn:disabled {
@@ -67,6 +69,61 @@
       background: #2a2a2a;
       border-radius: 5px;
     }
+
+    .category-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .category-item {
+      background-color: #333;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .category-item.selected {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .add-category {
+      background-color: #444;
+      padding: 0.5rem;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .selected-categories {
+      min-height: 50px;
+      border: 1px dashed #444;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 0.8rem;
+      background: #2a2a2a;
+      border: 1px solid #444;
+      border-radius: 5px;
+      color: white;
+      margin-top: 0.5rem;
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
   </style>
 </head>
 <body class="dark">
@@ -75,52 +132,165 @@
   </header>
   
   <main class="upload-section">
-    <!-- Upload-Box -->
+    <!-- Titel Box -->
+    <div class="upload-box">
+      <h2>Titel</h2>
+      <input type="text" id="videoTitle" name="title" placeholder="Video Titel eingeben" required>
+    </div>
+
+    <!-- Video Upload Box -->
     <div class="upload-box">
       <h2>Video hochladen</h2>
       
-      <form id="uploadForm" action="/admin/videos/upload" method="POST" enctype="multipart/form-data">
-        <div class="upload-area" id="dropZone">
-          <div class="upload-icon">
-            <i class="fas fa-cloud-upload-alt"></i>
-          </div>
-          <h3>Video hier ablegen oder klicken zum Auswählen</h3>
-          <p>Unterstützte Formate: MP4, WebM, MOV (max. 500MB)</p>
-          <input type="file" id="videoInput" name="video" accept="video/mp4,video/webm,video/quicktime" style="display: none;">
+      <div class="upload-area" id="dropZone">
+        <div class="upload-icon">
+          <i class="fas fa-cloud-upload-alt"></i>
         </div>
-        
-        <div class="file-info" id="fileInfo">
-          <i class="fas fa-info-circle"></i> Keine Datei ausgewählt
-        </div>
-        
-        <div style="text-align: right;">
-          <button type="submit" id="uploadBtn" disabled>
-            <i class="fas fa-upload"></i> Video veröffentlichen
-          </button>
-        </div>
-      </form>
-    </div>
-    
-    <!-- Preview-Box (optional) -->
-    <div class="preview-box">
-      <h2>Letzte Uploads</h2>
-      <div id="recentUploads">
-        <p>Noch keine Videos hochgeladen</p>
+        <h3>Video hier ablegen oder klicken zum Auswählen</h3>
+        <p>Unterstützte Formate: MP4, WebM, MOV (max. 500MB)</p>
+        <input type="file" id="videoInput" name="video" accept="video/mp4,video/webm,video/quicktime" style="display: none;">
+      </div>
+      
+      <div class="file-info" id="fileInfo">
+        <i class="fas fa-info-circle"></i> Keine Datei ausgewählt
       </div>
     </div>
+
+    <!-- Beschreibung Box -->
+    <div class="description-box">
+      <h2>Beschreibung</h2>
+      <textarea id="videoDescription" name="description" placeholder="Video Beschreibung eingeben" required></textarea>
+    </div>
+
+    <!-- Ausgewählte Kategorien Box -->
+    <div class="categories-box">
+      <h2>Ausgewählte Kategorien</h2>
+      <div class="selected-categories" id="selectedCategories">
+        <p>Noch keine Kategorien ausgewählt</p>
+      </div>
+    </div>
+
+    <!-- Verfügbare Kategorien Box -->
+    <div class="categories-box">
+      <h2>Kategorien</h2>
+      <div class="category-container" id="categoryContainer">
+        <!-- Kategorien werden hier dynamisch eingefügt -->
+        <div class="add-category" id="addCategoryBtn">
+          <i class="fas fa-plus"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upload Button -->
+    <button type="button" id="uploadBtn" disabled>
+      <i class="fas fa-upload"></i> Video veröffentlichen
+    </button>
   </main>
 
   <script>
-    // Drag & Drop Funktionen
+    // Globale Variablen
+    let selectedCategories = [];
+    let availableCategories = JSON.parse(localStorage.getItem('videoCategories')) || [
+      'Action', 'Comedy', 'Drama', 'Horror', 'Documentary'
+    ];
+
+    // DOM Elemente
     const dropZone = document.getElementById('dropZone');
     const videoInput = document.getElementById('videoInput');
     const fileInfo = document.getElementById('fileInfo');
     const uploadBtn = document.getElementById('uploadBtn');
-    
-    // Klick auf Dropzone
+    const videoTitle = document.getElementById('videoTitle');
+    const videoDescription = document.getElementById('videoDescription');
+    const selectedCategoriesContainer = document.getElementById('selectedCategories');
+    const categoryContainer = document.getElementById('categoryContainer');
+    const addCategoryBtn = document.getElementById('addCategoryBtn');
+
+    // Initialisierung
+    document.addEventListener('DOMContentLoaded', () => {
+      renderCategories();
+      updateUploadButton();
+    });
+
+    // Kategorie Rendering
+    function renderCategories() {
+      categoryContainer.innerHTML = '';
+      
+      availableCategories.forEach(category => {
+        const categoryElement = document.createElement('div');
+        categoryElement.className = 'category-item';
+        categoryElement.textContent = category;
+        
+        if (selectedCategories.includes(category)) {
+          categoryElement.classList.add('selected');
+        }
+        
+        categoryElement.addEventListener('click', () => toggleCategory(category));
+        categoryContainer.appendChild(categoryElement);
+      });
+      
+      // Plus-Button wieder hinzufügen
+      categoryContainer.appendChild(addCategoryBtn);
+    }
+
+    // Kategorie auswählen/abwählen
+    function toggleCategory(category) {
+      const index = selectedCategories.indexOf(category);
+      
+      if (index === -1) {
+        selectedCategories.push(category);
+      } else {
+        selectedCategories.splice(index, 1);
+      }
+      
+      renderSelectedCategories();
+      renderCategories();
+      updateUploadButton();
+    }
+
+    // Ausgewählte Kategorien anzeigen
+    function renderSelectedCategories() {
+      if (selectedCategories.length === 0) {
+        selectedCategoriesContainer.innerHTML = '<p>Noch keine Kategorien ausgewählt</p>';
+        return;
+      }
+      
+      selectedCategoriesContainer.innerHTML = '';
+      selectedCategories.forEach(category => {
+        const categoryElement = document.createElement('div');
+        categoryElement.className = 'category-item';
+        categoryElement.textContent = category;
+        categoryElement.addEventListener('click', () => toggleCategory(category));
+        selectedCategoriesContainer.appendChild(categoryElement);
+      });
+    }
+
+    // Neue Kategorie hinzufügen
+    addCategoryBtn.addEventListener('click', () => {
+      const newCategory = prompt('Neue Kategorie eingeben:');
+      if (newCategory && !availableCategories.includes(newCategory)) {
+        availableCategories.push(newCategory);
+        localStorage.setItem('videoCategories', JSON.stringify(availableCategories));
+        renderCategories();
+      }
+    });
+
+    // Upload Button Status aktualisieren
+    function updateUploadButton() {
+      const hasTitle = videoTitle.value.trim() !== '';
+      const hasDescription = videoDescription.value.trim() !== '';
+      const hasVideo = videoInput.files.length > 0;
+      const hasCategories = selectedCategories.length > 0;
+      
+      uploadBtn.disabled = !(hasTitle && hasDescription && hasVideo && hasCategories);
+    }
+
+    // Formularfelder überwachen
+    videoTitle.addEventListener('input', updateUploadButton);
+    videoDescription.addEventListener('input', updateUploadButton);
+
+    // Drag & Drop Funktionen
     dropZone.addEventListener('click', () => videoInput.click());
     
-    // Drag-Events
     dropZone.addEventListener('dragover', (e) => {
       e.preventDefault();
       dropZone.style.borderColor = '#4CAF50';
@@ -156,13 +326,45 @@
           <strong>${file.name}</strong> (${fileSizeMB} MB)
           <br><small>Typ: ${file.type || 'Unbekannt'}</small>
         `;
-        
-        uploadBtn.disabled = false;
       } else {
         fileInfo.innerHTML = '<i class="fas fa-info-circle"></i> Keine Datei ausgewählt';
-        uploadBtn.disabled = true;
       }
+      updateUploadButton();
     }
+
+    // Upload Funktion
+    uploadBtn.addEventListener('click', async () => {
+      if (uploadBtn.disabled) return;
+      
+      const formData = new FormData();
+      formData.append('title', videoTitle.value.trim());
+      formData.append('description', videoDescription.value.trim());
+      formData.append('categories', JSON.stringify(selectedCategories));
+      formData.append('video', videoInput.files[0]);
+      formData.append('status', 'pending');
+      
+      try {
+        uploadBtn.disabled = true;
+        uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Wird hochgeladen...';
+        
+        const response = await fetch('/admin/videos/upload', {
+          method: 'POST',
+          body: formData
+        });
+        
+        if (response.ok) {
+          alert('Video erfolgreich hochgeladen!');
+          window.location.href = '/admin';
+        } else {
+          throw new Error('Upload fehlgeschlagen');
+        }
+      } catch (error) {
+        console.error('Upload error:', error);
+        alert('Fehler beim Hochladen: ' + error.message);
+        uploadBtn.disabled = false;
+        uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Video veröffentlichen';
+      }
+    });
   </script>
 </body>
 </html>
