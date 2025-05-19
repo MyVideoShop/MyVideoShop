@@ -7,6 +7,9 @@ require('dotenv').config();
 
 const app = express();
 
+const adminUploadRoutes = require('./routes/adminUpload');
+app.use('/', adminUploadRoutes);
+
 // === Routen laden ===
 const authRoutes = require('./routes/auth');
 const supportRouter = require('./routes/support');
