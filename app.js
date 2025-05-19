@@ -1,101 +1,66 @@
+require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
-const fs = require('fs');
-const path = require('path');
 const mongoose = require('mongoose');
-require('dotenv').config();
+const path = require('path');
+const fs = require('fs');
+
+// Routen imports
+const authRoutes = require('./routes/auth');
+const supportRoutes = require('./routes/support');
+const adminSupportRoutes = require('./routes/admin/support');
+const adminStatsRoutes = require('./routes/admin/stats');
+const videoRoutes = require('./routes/admin/videos');
 
 const app = express();
 
-const adminUploadRoutes = require('./routes/adminUpload');
-app.use('/', adminUploadRoutes);
+// MongoDB Verbindung
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('✅ Mit MongoDB verbunden'))
+  .catch(err => console.error('❌ MongoDB Verbindungsfehler:', err));
 
-// === Routen laden ===
-const authRoutes = require('./routes/auth');
-const supportRouter = require('./routes/support');
-const adminSupportRouter = require('./routes/admin/support');
-const adminStatsRouter = require('./routes/admin/stats');
-
-// === Daten-Dateien ===
-const statsFile = path.join(__dirname, 'data', 'visits.json');
-const supportFile = path.join(__dirname, 'data', 'supportMessages.json');
-
-if (!fs.existsSync(statsFile)) fs.writeFileSync(statsFile, JSON.stringify({ total: 0, online: 0 }));
-if (!fs.existsSync(supportFile)) fs.writeFileSync(supportFile, JSON.stringify([]));
-
-// Alte Supportnachrichten löschen
-try {
-  const SupportMessage = require('./models/SupportMessage');
-  setInterval(async () => {
-    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    await SupportMessage.deleteMany({ createdAt: { $lt: weekAgo } });
-  }, 6 * 60 * 60 * 1000);
-} catch {
-  console.warn('⚠️ SupportMessage-Modell nicht gefunden – automatische Löschung deaktiviert');
-}
-
-// === Middleware ===
+// Middleware
 app.use(express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(session({
-  secret: 'geheimnis123',
+  secret: process.env.SESSION_SECRET || 'geheimer_schluessel',
   resave: false,
   saveUninitialized: true,
-  cookie: { maxAge: 5 * 60 * 1000 },
+  cookie: { secure: process.env.NODE_ENV === 'production' }
 }));
 
-// === EJS-Vorlagen ===
+// EJS Konfiguration
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// === Besucherzähler ===
-app.use((req, res, next) => {
-  const stats = JSON.parse(fs.readFileSync(statsFile));
-  if (!req.session.hasCountedOnline) {
-    stats.online += 1;
-    req.session.hasCountedOnline = true;
-    setTimeout(() => {
-      const updated = JSON.parse(fs.readFileSync(statsFile));
-      updated.online = Math.max(0, updated.online - 1);
-      fs.writeFileSync(statsFile, JSON.stringify(updated, null, 2));
-    }, req.session.cookie.maxAge);
-  }
-  fs.writeFileSync(statsFile, JSON.stringify(stats, null, 2));
-  next();
+// Routen
+app.use('/auth', authRoutes);
+app.use('/support', supportRoutes);
+app.use('/admin/support', adminSupportRoutes);
+app.use('/admin/stats', adminStatsRoutes);
+app.use('/admin/videos', videoRoutes);
+
+// Hauptrouten
+app.get('/', (req, res) => {
+  res.render('index', { 
+    shopName: process.env.SHOP_NAME || 'MyVideoShop' 
+  });
 });
 
-// === Routen ===
-app.use('/support', supportRouter);
-app.use('/admin/support', adminSupportRouter);
-app.use('/admin/stats', adminStatsRouter);
-app.use('/', authRoutes);
-
-// === Startseite ===
-app.get('/', async (req, res) => {
-  try {
-    const referer = req.get('referer');
-    const localHost = `${req.protocol}://${req.get('host')}`;
-
-    if (!referer || !referer.startsWith(localHost)) {
-      const stats = JSON.parse(fs.readFileSync(statsFile));
-      stats.total += 1;
-      fs.writeFileSync(statsFile, JSON.stringify(stats, null, 2));
-    }
-
-    const shopName = process.env.SHOP_NAME || 'MyVideoShop';
-    res.render('index', { shopName });
-  } catch (err) {
-    console.error('Fehler auf der Startseite:', err);
-    res.status(500).send('Interner Serverfehler');
-  }
-});
-
-// === Admin-UI ===
 app.get('/admin', (req, res) => res.render('admin'));
-app.get('/admin/:section', (req, res) => res.status(404).send('Diese Admin-Seite existiert nicht.'));
-app.get('/creator/:name', (req, res) => res.render('creator', { name: req.params.name }));
+app.get('/creator/:name', (req, res) => {
+  res.render('creator', { name: req.params.name });
+});
 
-// === Serverstart ===
+// Fehlerbehandlung
+app.use((err, req, res, next) => {
+  console.error('❌ Serverfehler:', err.stack);
+  res.status(500).send('Ein Serverfehler ist aufgetreten');
+});
+
+// Server starten
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Server läuft auf Port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`🚀 Server läuft auf http://localhost:${PORT}`);
+});
