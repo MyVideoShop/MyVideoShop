@@ -70,14 +70,22 @@ app.use('/', authRoutes);
 
 // === Startseite ===
 app.get('/', async (req, res) => {
-  const referer = req.get('referer');
-  const localHost = `${req.protocol}://${req.get('host')}`;
-)}
-  if (!referer || !referer.startsWith(localHost)) {
-    const stats = JSON.parse(fs.readFileSync(statsFile));
-    stats.total += 1;
-    fs.writeFileSync(statsFile, JSON.stringify(stats, null, 2));
+  try {
+    const referer = req.get('referer');
+    const localHost = `${req.protocol}://${req.get('host')}`;
+
+    if (!referer || !referer.startsWith(localHost)) {
+      const stats = JSON.parse(fs.readFileSync(statsFile));
+      stats.total += 1;
+      fs.writeFileSync(statsFile, JSON.stringify(stats, null, 2));
+    }
+
+    res.render('index'); // oder eine andere Startseite, je nach Bedarf
+  } catch (err) {
+    console.error('Fehler beim Laden der Startseite:', err);
+    res.status(500).send('Interner Serverfehler');
   }
+});
 
 // === Admin-UI ===
 app.get('/admin', (req, res) => res.render('admin'));
