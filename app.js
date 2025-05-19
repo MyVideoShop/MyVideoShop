@@ -72,7 +72,7 @@ app.use('/', authRoutes);
 app.get('/', async (req, res) => {
   const referer = req.get('referer');
   const localHost = `${req.protocol}://${req.get('host')}`;
-}
+)}
   if (!referer || !referer.startsWith(localHost)) {
     const stats = JSON.parse(fs.readFileSync(statsFile));
     stats.total += 1;
