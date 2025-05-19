@@ -14,26 +14,7 @@
 
   <main>
     <h2>Willkommen auf der Startseite!</h2>
-
-    <% if (videos.length === 0) { %>
-      <p>Hier werden bald Videos angezeigt...</p>
-    <% } else { %>
-      <div class="video-grid">
-        <% videos.forEach(video => { %>
-          <div class="video-box">
-            <h3><%= video.title %></h3>
-            <p><%= video.description %></p>
-            <div class="video-wrapper">
-              <iframe 
-                src="<%= video.iframeUrl %>" 
-                allowfullscreen 
-                allow="autoplay; encrypted-media">
-              </iframe>
-            </div>
-          </div>
-        <% }) %>
-      </div>
-    <% } %>
+    <p>Hier findest du bald spannende Inhalte.</p>
   </main>
 
   <button id="loginButton" class="corner-btn">Creator Login</button>
