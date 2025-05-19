@@ -79,21 +79,6 @@ app.get('/', async (req, res) => {
     fs.writeFileSync(statsFile, JSON.stringify(stats, null, 2));
   }
 
-  try {
-    const videos = await Video.find({ status: 'done' }).lean();
-    const formatted = videos.map(v => ({
-      id: v._id.toString(),
-      title: v.title,
-      description: v.description,
-      iframeUrl: `/video/${v._id}`,
-    }));
-    res.render('index', { shopName: 'MyVideoShop', videos: formatted });
-  } catch (err) {
-    console.error('Fehler beim Laden der Videos:', err);
-    res.render('index', { shopName: 'MyVideoShop', videos: [] });
-  }
-});
-
 // === Admin-UI ===
 app.get('/admin', (req, res) => res.render('admin'));
 app.get('/admin/:section', (req, res) => res.status(404).send('Diese Admin-Seite existiert nicht.'));
