@@ -1,168 +1,168 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Upload | Admin-Dashboard</title>
-    <link rel="stylesheet" href="/css/admin.css">
-    <style>
-        .content-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-        
-        .card {
-            background: #2A2A2A;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 25px;
-            margin-bottom: 30px;
-        }
-        
-        .upload-area {
-            border: 2px dashed #444;
-            border-radius: 6px;
-            padding: 40px;
-            text-align: center;
-            margin-bottom: 20px;
-            transition: all 0.3s;
-            position: relative;
-        }
-        
-        .upload-area:hover {
-            border-color: #555;
-        }
-        
-        .upload-icon {
-            font-size: 48px;
-            color: #555;
-            margin-bottom: 15px;
-        }
-        
-        .btn-primary {
-            background: #4E73DF;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            color: white;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        
-        .btn-primary:hover {
-            background: #3B5BBD;
-        }
-        
-        .btn-primary:disabled {
-            background: #3A3A3A;
-            cursor: not-allowed;
-        }
-        
-        .file-info {
-            margin-top: 15px;
-            color: #AAA;
-        }
-    </style>
-</head>
-<body class="admin-dashboard">
-    <div class="container-fluid">
-        <!-- Header Bereich -->
-        <div class="content-header">
-            <h1 class="page-title">
-                <a href="/admin" style="color: inherit; text-decoration: none;">
-                    <i class="fas fa-arrow-left"></i> Video Upload
-                </a>
-            </h1>
-        </div>
-        
-        <!-- Hauptinhalt -->
-        <div class="card">
-            <h2>Neues Video hochladen</h2>
-            <form id="uploadForm" action="/admin/videos/upload" method="POST" enctype="multipart/form-data">
-                <div class="upload-area" id="dropZone">
-                    <div class="upload-icon">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                    </div>
-                    <h4>Video hier ablegen oder klicken zum Auswählen</h4>
-                    <p>Nur MP4, WebM oder MOV Dateien</p>
-                    <input type="file" id="videoInput" name="video" accept="video/mp4,video/webm,video/quicktime" style="display: none;">
-                </div>
-                
-                <div class="file-info" id="fileInfo">
-                    Keine Datei ausgewählt
-                </div>
-                
-                <div class="form-footer">
-                    <button type="submit" class="btn-primary" id="uploadBtn" disabled>
-                        <i class="fas fa-upload"></i> Video veröffentlichen
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
+  <meta charset="UTF-8" />
+  <title>Video Upload – Admin Dashboard</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    .upload-section {
+      padding: 2rem;
+    }
 
-    <!-- JavaScript -->
-    <script>
-        const dropZone = document.getElementById('dropZone');
-        const videoInput = document.getElementById('videoInput');
-        const fileInfo = document.getElementById('fileInfo');
-        const uploadBtn = document.getElementById('uploadBtn');
-        const uploadForm = document.getElementById('uploadForm');
+    .upload-box, .preview-box {
+      background-color: #1e1e1e;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .upload-box:hover, .preview-box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.6);
+      background-color: #2a2a2a;
+    }
+
+    .upload-area {
+      border: 2px dashed #444;
+      border-radius: 8px;
+      padding: 2rem;
+      text-align: center;
+      margin: 1.5rem 0;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .upload-area:hover {
+      border-color: #666;
+    }
+
+    .upload-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: #555;
+    }
+
+    #uploadBtn {
+      background-color: #4CAF50;
+      padding: 0.7rem 1.5rem;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    #uploadBtn:disabled {
+      background-color: #3a3a3a;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .file-info {
+      margin-top: 1rem;
+      padding: 0.8rem;
+      background: #2a2a2a;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body class="dark">
+  <header>
+    <h1><a href="/admin" class="dashboard-title">Admin Dashboard</a></h1>
+  </header>
+  
+  <main class="upload-section">
+    <!-- Upload-Box -->
+    <div class="upload-box">
+      <h2>Video hochladen</h2>
+      
+      <form id="uploadForm" action="/admin/videos/upload" method="POST" enctype="multipart/form-data">
+        <div class="upload-area" id="dropZone">
+          <div class="upload-icon">
+            <i class="fas fa-cloud-upload-alt"></i>
+          </div>
+          <h3>Video hier ablegen oder klicken zum Auswählen</h3>
+          <p>Unterstützte Formate: MP4, WebM, MOV (max. 500MB)</p>
+          <input type="file" id="videoInput" name="video" accept="video/mp4,video/webm,video/quicktime" style="display: none;">
+        </div>
         
-        // Klick-Ereignis für die Dropzone
-        dropZone.addEventListener('click', () => {
-            videoInput.click();
-        });
+        <div class="file-info" id="fileInfo">
+          <i class="fas fa-info-circle"></i> Keine Datei ausgewählt
+        </div>
         
-        // Drag & Drop Funktionen
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.style.borderColor = '#4E73DF';
-            dropZone.style.backgroundColor = 'rgba(78, 115, 223, 0.1)';
-        });
+        <div style="text-align: right;">
+          <button type="submit" id="uploadBtn" disabled>
+            <i class="fas fa-upload"></i> Video veröffentlichen
+          </button>
+        </div>
+      </form>
+    </div>
+    
+    <!-- Preview-Box (optional) -->
+    <div class="preview-box">
+      <h2>Letzte Uploads</h2>
+      <div id="recentUploads">
+        <p>Noch keine Videos hochgeladen</p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Drag & Drop Funktionen
+    const dropZone = document.getElementById('dropZone');
+    const videoInput = document.getElementById('videoInput');
+    const fileInfo = document.getElementById('fileInfo');
+    const uploadBtn = document.getElementById('uploadBtn');
+    
+    // Klick auf Dropzone
+    dropZone.addEventListener('click', () => videoInput.click());
+    
+    // Drag-Events
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.style.borderColor = '#4CAF50';
+      dropZone.style.backgroundColor = 'rgba(76, 175, 80, 0.1)';
+    });
+    
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.style.borderColor = '#444';
+      dropZone.style.backgroundColor = 'transparent';
+    });
+    
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.style.borderColor = '#444';
+      dropZone.style.backgroundColor = 'transparent';
+      
+      if (e.dataTransfer.files.length) {
+        videoInput.files = e.dataTransfer.files;
+        updateFileInfo();
+      }
+    });
+    
+    // Dateiauswahl ändern
+    videoInput.addEventListener('change', updateFileInfo);
+    
+    function updateFileInfo() {
+      if (videoInput.files.length > 0) {
+        const file = videoInput.files[0];
+        const fileSizeMB = (file.size / (1024*1024)).toFixed(2);
         
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.style.borderColor = '#444';
-            dropZone.style.backgroundColor = 'transparent';
-        });
+        fileInfo.innerHTML = `
+          <i class="fas fa-file-video"></i> 
+          <strong>${file.name}</strong> (${fileSizeMB} MB)
+          <br><small>Typ: ${file.type || 'Unbekannt'}</small>
+        `;
         
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.style.borderColor = '#444';
-            dropZone.style.backgroundColor = 'transparent';
-            
-            if (e.dataTransfer.files.length) {
-                videoInput.files = e.dataTransfer.files;
-                updateFileInfo();
-            }
-        });
-        
-        // Dateiauswahl ändern
-        videoInput.addEventListener('change', updateFileInfo);
-        
-        function updateFileInfo() {
-            if (videoInput.files.length > 0) {
-                const file = videoInput.files[0];
-                fileInfo.innerHTML = `
-                    <strong>Ausgewählte Datei:</strong> ${file.name}<br>
-                    <small>Größe: ${formatFileSize(file.size)}</small>
-                `;
-                uploadBtn.disabled = false;
-            } else {
-                fileInfo.textContent = 'Keine Datei ausgewählt';
-                uploadBtn.disabled = true;
-            }
-        }
-        
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-    </script>
+        uploadBtn.disabled = false;
+      } else {
+        fileInfo.innerHTML = '<i class="fas fa-info-circle"></i> Keine Datei ausgewählt';
+        uploadBtn.disabled = true;
+      }
+    }
+  </script>
 </body>
 </html>
