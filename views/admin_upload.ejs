@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Video hochladen</title>
+</head>
+<body>
+    <h1>Video hochladen</h1>
+    <form action="/admin/upload" method="POST" enctype="multipart/form-data">
+        <label for="folder">Zielordner (optional):</label>
+        <input type="text" name="folder" placeholder="z. B. Serien/Folge1"><br><br>
+
+        <label for="video">Video auswählen:</label>
+        <input type="file" name="video" required><br><br>
+
+        <button type="submit">Hochladen</button>
+    </form>
+</body>
+</html>
