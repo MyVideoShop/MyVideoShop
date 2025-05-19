@@ -20,8 +20,6 @@ const supportFile = path.join(__dirname, 'data', 'supportMessages.json');
 if (!fs.existsSync(statsFile)) fs.writeFileSync(statsFile, JSON.stringify({ total: 0, online: 0 }));
 if (!fs.existsSync(supportFile)) fs.writeFileSync(supportFile, JSON.stringify([]));
 
-res.render('index', { shopName: 'MyVideoShop' });
-
 // Alte Supportnachrichten löschen
 try {
   const SupportMessage = require('./models/SupportMessage');
@@ -82,9 +80,10 @@ app.get('/', async (req, res) => {
       fs.writeFileSync(statsFile, JSON.stringify(stats, null, 2));
     }
 
-    res.render('index'); // oder eine andere Startseite, je nach Bedarf
+    const shopName = process.env.SHOP_NAME || 'MyVideoShop';
+    res.render('index', { shopName });
   } catch (err) {
-    console.error('Fehler beim Laden der Startseite:', err);
+    console.error('Fehler auf der Startseite:', err);
     res.status(500).send('Interner Serverfehler');
   }
 });
