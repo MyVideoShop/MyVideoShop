@@ -1,18 +1,101 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
-    <title>Video hochladen</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Upload | Admin-Dashboard</title>
+    <!-- Stile aus deinem Haupt-CSS einbinden -->
+    <link rel="stylesheet" href="/css/admin.css">
+    <style>
+        .upload-box {
+            background-color: #2d2d2d; /* Dunkler Hintergrund wie im Dashboard */
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 600px;
+            text-align: center;
+        }
+        .upload-box h2 {
+            color: #fff;
+            margin-bottom: 20px;
+        }
+        #upload-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        #video-upload {
+            display: none; /* Verstecke das Standard-Input */
+        }
+        .upload-label {
+            background-color: #444;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .upload-label:hover {
+            background-color: #555;
+        }
+        #file-name {
+            color: #aaa;
+            margin-top: 10px;
+        }
+        #publish-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+            opacity: 0.5; /* Standardmäßig deaktiviert */
+            pointer-events: none; /* Klicks blockieren */
+        }
+        #publish-btn.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+    </style>
 </head>
-<body>
-    <h1>Video hochladen</h1>
-    <form action="/admin/upload" method="POST" enctype="multipart/form-data">
-        <label for="folder">Zielordner (optional):</label>
-        <input type="text" name="folder" placeholder="z. B. Serien/Folge1"><br><br>
+<body class="admin-dashboard">
+    <!-- Header mit Titel und Backlink -->
+    <header class="admin-header">
+        <h1>
+            <a href="/admin" style="color: inherit; text-decoration: none;">Admin-Dashboard</a>
+        </h1>
+    </header>
 
-        <label for="video">Video auswählen:</label>
-        <input type="file" name="video" required><br><br>
+    <!-- Upload-Box -->
+    <div class="upload-box">
+        <h2>Video hochladen</h2>
+        <form id="upload-form" action="/admin/upload" method="POST" enctype="multipart/form-data">
+            <!-- Versteckter File-Input -->
+            <input type="file" id="video-upload" name="video" accept="video/*" required>
+            <!-- Custom Upload-Button -->
+            <label for="video-upload" class="upload-label">Video auswählen</label>
+            <div id="file-name">Kein Video ausgewählt</div>
+            <button type="submit" id="publish-btn">Veröffentlichen</button>
+        </form>
+    </div>
 
-        <button type="submit">Hochladen</button>
-    </form>
+    <!-- JavaScript für Upload-Logik -->
+    <script>
+        const videoInput = document.getElementById('video-upload');
+        const fileNameDisplay = document.getElementById('file-name');
+        const publishBtn = document.getElementById('publish-btn');
+
+        videoInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                fileNameDisplay.textContent = e.target.files[0].name;
+                publishBtn.classList.add('active'); // Button aktivieren
+            } else {
+                fileNameDisplay.textContent = 'Kein Video ausgewählt';
+                publishBtn.classList.remove('active'); // Button deaktivieren
+            }
+        });
+    </script>
 </body>
 </html>
