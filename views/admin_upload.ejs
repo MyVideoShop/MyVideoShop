@@ -4,98 +4,165 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Upload | Admin-Dashboard</title>
-    <!-- Stile aus deinem Haupt-CSS einbinden -->
     <link rel="stylesheet" href="/css/admin.css">
     <style>
-        .upload-box {
-            background-color: #2d2d2d; /* Dunkler Hintergrund wie im Dashboard */
-            border-radius: 8px;
-            padding: 20px;
-            margin: 20px auto;
-            max-width: 600px;
-            text-align: center;
-        }
-        .upload-box h2 {
-            color: #fff;
-            margin-bottom: 20px;
-        }
-        #upload-form {
+        .content-header {
             display: flex;
-            flex-direction: column;
-            gap: 15px;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
         }
-        #video-upload {
-            display: none; /* Verstecke das Standard-Input */
+        
+        .card {
+            background: #2A2A2A;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            margin-bottom: 30px;
         }
-        .upload-label {
-            background-color: #444;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background 0.3s;
+        
+        .upload-area {
+            border: 2px dashed #444;
+            border-radius: 6px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            position: relative;
         }
-        .upload-label:hover {
-            background-color: #555;
+        
+        .upload-area:hover {
+            border-color: #555;
         }
-        #file-name {
-            color: #aaa;
-            margin-top: 10px;
+        
+        .upload-icon {
+            font-size: 48px;
+            color: #555;
+            margin-bottom: 15px;
         }
-        #publish-btn {
-            background-color: #4CAF50;
-            color: white;
+        
+        .btn-primary {
+            background: #4E73DF;
             border: none;
-            padding: 12px;
+            padding: 10px 20px;
             border-radius: 4px;
+            color: white;
             cursor: pointer;
-            font-size: 16px;
             transition: background 0.3s;
-            opacity: 0.5; /* Standardmäßig deaktiviert */
-            pointer-events: none; /* Klicks blockieren */
         }
-        #publish-btn.active {
-            opacity: 1;
-            pointer-events: auto;
+        
+        .btn-primary:hover {
+            background: #3B5BBD;
+        }
+        
+        .btn-primary:disabled {
+            background: #3A3A3A;
+            cursor: not-allowed;
+        }
+        
+        .file-info {
+            margin-top: 15px;
+            color: #AAA;
         }
     </style>
 </head>
 <body class="admin-dashboard">
-    <!-- Header mit Titel und Backlink -->
-    <header class="admin-header">
-        <h1>
-            <a href="/admin" style="color: inherit; text-decoration: none;">Admin-Dashboard</a>
-        </h1>
-    </header>
-
-    <!-- Upload-Box -->
-    <div class="upload-box">
-        <h2>Video hochladen</h2>
-        <form id="upload-form" action="/admin/upload" method="POST" enctype="multipart/form-data">
-            <!-- Versteckter File-Input -->
-            <input type="file" id="video-upload" name="video" accept="video/*" required>
-            <!-- Custom Upload-Button -->
-            <label for="video-upload" class="upload-label">Video auswählen</label>
-            <div id="file-name">Kein Video ausgewählt</div>
-            <button type="submit" id="publish-btn">Veröffentlichen</button>
-        </form>
+    <div class="container-fluid">
+        <!-- Header Bereich -->
+        <div class="content-header">
+            <h1 class="page-title">
+                <a href="/admin" style="color: inherit; text-decoration: none;">
+                    <i class="fas fa-arrow-left"></i> Video Upload
+                </a>
+            </h1>
+        </div>
+        
+        <!-- Hauptinhalt -->
+        <div class="card">
+            <h2>Neues Video hochladen</h2>
+            <form id="uploadForm" action="/admin/videos/upload" method="POST" enctype="multipart/form-data">
+                <div class="upload-area" id="dropZone">
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <h4>Video hier ablegen oder klicken zum Auswählen</h4>
+                    <p>Nur MP4, WebM oder MOV Dateien</p>
+                    <input type="file" id="videoInput" name="video" accept="video/mp4,video/webm,video/quicktime" style="display: none;">
+                </div>
+                
+                <div class="file-info" id="fileInfo">
+                    Keine Datei ausgewählt
+                </div>
+                
+                <div class="form-footer">
+                    <button type="submit" class="btn-primary" id="uploadBtn" disabled>
+                        <i class="fas fa-upload"></i> Video veröffentlichen
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 
-    <!-- JavaScript für Upload-Logik -->
+    <!-- JavaScript -->
     <script>
-        const videoInput = document.getElementById('video-upload');
-        const fileNameDisplay = document.getElementById('file-name');
-        const publishBtn = document.getElementById('publish-btn');
-
-        videoInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                fileNameDisplay.textContent = e.target.files[0].name;
-                publishBtn.classList.add('active'); // Button aktivieren
-            } else {
-                fileNameDisplay.textContent = 'Kein Video ausgewählt';
-                publishBtn.classList.remove('active'); // Button deaktivieren
+        const dropZone = document.getElementById('dropZone');
+        const videoInput = document.getElementById('videoInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const uploadForm = document.getElementById('uploadForm');
+        
+        // Klick-Ereignis für die Dropzone
+        dropZone.addEventListener('click', () => {
+            videoInput.click();
+        });
+        
+        // Drag & Drop Funktionen
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#4E73DF';
+            dropZone.style.backgroundColor = 'rgba(78, 115, 223, 0.1)';
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.style.borderColor = '#444';
+            dropZone.style.backgroundColor = 'transparent';
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#444';
+            dropZone.style.backgroundColor = 'transparent';
+            
+            if (e.dataTransfer.files.length) {
+                videoInput.files = e.dataTransfer.files;
+                updateFileInfo();
             }
         });
+        
+        // Dateiauswahl ändern
+        videoInput.addEventListener('change', updateFileInfo);
+        
+        function updateFileInfo() {
+            if (videoInput.files.length > 0) {
+                const file = videoInput.files[0];
+                fileInfo.innerHTML = `
+                    <strong>Ausgewählte Datei:</strong> ${file.name}<br>
+                    <small>Größe: ${formatFileSize(file.size)}</small>
+                `;
+                uploadBtn.disabled = false;
+            } else {
+                fileInfo.textContent = 'Keine Datei ausgewählt';
+                uploadBtn.disabled = true;
+            }
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
     </script>
 </body>
 </html>
