@@ -7,7 +7,6 @@ require('dotenv').config();
 
 const app = express();
 
-/
 // === Routen laden ===
 const authRoutes = require('./routes/auth');
 const supportRouter = require('./routes/support');
