@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>AniCleaner</title>
+<meta charset="UTF-8">
+<title>Player Tools</title>
 </head>
 <body>
-    <h1>AniCleaner läuft</h1>
+<h3>Bookmarklet</h3>
+<p>Ziehen:</p>
 
-    <p>Zum Testen:  
-        <br> /clean?url=DEIN-ANIWORLD-LINK
-    </p>
+<a href="javascript:(function(){fetch('https://YOUR-RENDER-URL/inject.js').then(r=>r.text()).then(t=>eval(t));})();">
+Inject Script
+</a>
+
 </body>
 </html>
