@@ -86,3 +86,7 @@ app.get("/p/*", async (req, res) => {
 
 // Start
 app.listen(PORT, () => console.log("OK"));
+
+app.get("/", (req, res) => {
+  res.send("Running");
+});
