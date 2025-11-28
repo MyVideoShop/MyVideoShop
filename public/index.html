@@ -67,22 +67,7 @@
             margin-right: 10px;
         }
         
-        .bookmarklet-drag {
-            display: block;
-            background: linear-gradient(45deg, #e74c3c, #c0392b);
-            color: white;
-            padding: 25px;
-            border-radius: 15px;
-            text-decoration: none;
-            text-align: center;
-            font-size: 1.3em;
-            font-weight: bold;
-            margin: 20px 0;
-            border: none;
-            cursor: pointer;
-        }
-        
-        .copy-box {
+        .bookmarklet-box {
             background: rgba(0,0,0,0.3);
             padding: 15px;
             border-radius: 10px;
@@ -117,49 +102,80 @@
             border-radius: 10px;
             border: 1px solid rgba(52, 152, 219, 0.4);
         }
+        
+        input, textarea {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #444;
+            background: rgba(0,0,0,0.3);
+            color: white;
+            font-size: 1.1em;
+            margin: 10px 0;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .url-input-section {
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>🎬 Streaming Enhancer</h1>
-            <p>Für iPad - Einmal einrichten, überall nutzen</p>
+            <p>Für iPad - Textfelder funktionieren garantiert!</p>
         </header>
         
         <div class="card">
-            <h2>📋 So einfach geht's:</h2>
+            <h2>🚀 Schnellstart</h2>
             
             <div class="step">
                 <div class="step-number">1</div>
-                <strong>Bookmarklet erstellen</strong>
-                <p style="margin-top: 10px;">Ziehe diesen Button in deine Lesezeichen-Leiste:</p>
+                <strong>Bookmarklet Code kopieren</strong>
+                <p style="margin-top: 10px;">Kopiere diesen Code:</p>
                 
-                <a href="javascript:(function(){var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/gh/OpenUserJS/OpenUserJS.org/data/userscripts/Strencher_-_My_Anime_List_Enhancer.user.js';document.head.appendChild(s);})();" 
-                   class="bookmarklet-drag" id="dragButton">
-                    🎬 Drag to Bookmarks
-                </a>
-                
-                <p><em>Oder kopiere diesen Code und erstelle ein Lesezeichen:</em></p>
-                <div class="copy-box" id="bookmarkletCode">
-                    javascript:(function(){var script=document.createElement('script');script.src='https://your-render-url.onrender.com/enhancer.js';document.head.appendChild(script);})();
+                <div class="bookmarklet-box" id="bookmarkletCode">
+                    javascript:(function(){var script=document.createElement('script');script.src='YOUR-RENDER-URL/enhancer-safe.js';document.head.appendChild(script);})();
                 </div>
                 <button onclick="copyBookmarklet()">📋 Code kopieren</button>
             </div>
             
             <div class="step">
                 <div class="step-number">2</div>
-                <strong>Streaming-Seite öffnen</strong>
-                <p style="margin-top: 10px;">Öffne eine normale Streaming-Seite:</p>
-                <button onclick="window.open('https://aniworld.to')">📺 Aniworld öffnen</button>
-                <button onclick="window.open('https://s.to')">🎬 s.to öffnen</button>
-                <button onclick="window.open('https://lookmovies.io')">🍿 LookMovies öffnen</button>
+                <strong>Lesezeichen erstellen</strong>
+                <p style="margin-top: 10px;">Erstelle ein neues Lesezeichen mit dem kopierten Code als URL.</p>
+                <p><em>Nenne es z.B. "🎬 Streaming Enhancer"</em></p>
             </div>
             
             <div class="step">
                 <div class="step-number">3</div>
-                <strong>Enhancer aktivieren</strong>
-                <p style="margin-top: 10px;">Klicke auf das "🎬 Drag to Bookmarks" Lesezeichen in deiner Lesezeichen-Leiste.</p>
-                <p><em>Das Control-Panel erscheint auf der aktuellen Seite!</em></p>
+                <strong>Streaming-Seite öffnen & aktivieren</strong>
+                <p style="margin-top: 10px;">Öffne eine Streaming-Seite und klicke dann auf das Lesezeichen.</p>
+                
+                <button onclick="window.open('https://aniworld.to')">📺 Aniworld öffnen</button>
+                <button onclick="window.open('https://s.to')">🎬 s.to öffnen</button>
+                <button onclick="window.open('https://lookmovies.io')">🍿 LookMovies öffnen</button>
+            </div>
+        </div>
+        
+        <div class="url-input-section">
+            <h2>🔧 Deine Render URL eintragen</h2>
+            <p>Bevor du den Code kopierst, trage hier deine Render-URL ein:</p>
+            
+            <input type="text" id="renderUrl" placeholder="https://dein-app-name.onrender.com" value="">
+            <button onclick="updateBookmarklet()">📝 URL aktualisieren</button>
+            
+            <div style="margin-top: 15px; padding: 10px; background: rgba(46, 204, 113, 0.2); border-radius: 8px;">
+                <strong>Deine aktuelle URL:</strong>
+                <div id="currentUrl" style="font-family: monospace; margin-top: 5px;"></div>
             </div>
         </div>
         
@@ -168,43 +184,46 @@
             <div class="feature-list">
                 <div class="feature">
                     <strong>🚫 Smart Ad-Block</strong>
-                    <p>Blockiert Werbung ohne ständige Benachrichtigungen</p>
+                    <p>Blockiert NUR Werbung</p>
                 </div>
                 <div class="feature">
                     <strong>⏭️ Intro Skip</strong>
-                    <p>Überspringe Intros mit einem Klick</p>
+                    <p>Überspringe Intros</p>
                 </div>
                 <div class="feature">
                     <strong>▶️ Auto Next</strong>
-                    <p>Automatisch nächste Folgen</p>
+                    <p>Nächste Folgen automatisch</p>
                 </div>
                 <div class="feature">
-                    <strong>🛡️ Popup-Blocker</strong>
-                    <p>Keine unerwünschten Weiterleitungen</p>
+                    <strong>✅ Textfelder safe</strong>
+                    <p>Alle Eingabefelder funktionieren</p>
                 </div>
             </div>
-        </div>
-        
-        <div class="card">
-            <h2>🔧 Für Render</h2>
-            <p>Ersetze in den Code-Beispielen:</p>
-            <div class="copy-box">
-                https://your-render-url.onrender.com
-            </div>
-            <p>...mit deiner echten Render-URL!</p>
         </div>
     </div>
 
     <script>
-        // Aktuelle URL für Bookmarklet setzen
+        // Textfelder sind JETZT funktionsfähig!
+        
+        // Aktuelle URL anzeigen
         const currentUrl = window.location.origin;
+        document.getElementById('currentUrl').textContent = currentUrl;
+        document.getElementById('renderUrl').value = currentUrl;
         
         // Bookmarklet Code aktualisieren
-        const bookmarkletCode = `javascript:(function(){var script=document.createElement('script');script.src='${currentUrl}/enhancer.js';document.head.appendChild(script);})();`;
+        function updateBookmarklet() {
+            const renderUrl = document.getElementById('renderUrl').value.trim();
+            if (!renderUrl) {
+                alert('Bitte eine URL eingeben');
+                return;
+            }
+            
+            const bookmarkletCode = `javascript:(function(){var script=document.createElement('script');script.src='${renderUrl}/enhancer-safe.js';document.head.appendChild(script);})();`;
+            document.getElementById('bookmarkletCode').textContent = bookmarkletCode;
+            
+            alert('URL aktualisiert! Jetzt Code kopieren.');
+        }
         
-        document.getElementById('bookmarkletCode').textContent = bookmarkletCode;
-        document.getElementById('dragButton').href = bookmarkletCode;
-
         function copyBookmarklet() {
             const code = document.getElementById('bookmarkletCode').textContent;
             navigator.clipboard.writeText(code).then(() => {
@@ -212,17 +231,8 @@
             });
         }
         
-        // Bookmarklet Drag Feedback
-        const dragButton = document.getElementById('dragButton');
-        dragButton.addEventListener('dragstart', function(e) {
-            e.dataTransfer.setData('text/uri-list', this.href);
-            e.dataTransfer.setData('text/plain', this.href);
-            this.style.opacity = '0.5';
-        });
-        
-        dragButton.addEventListener('dragend', function() {
-            this.style.opacity = '1';
-        });
+        // Initial Bookmarklet setzen
+        updateBookmarklet();
     </script>
 </body>
 </html>
