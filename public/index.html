@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Streaming Enhancer</title>
+    <title>Streaming Enhancer für iPad</title>
     <style>
         * {
             margin: 0;
@@ -12,11 +12,12 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             background: linear-gradient(135deg, #1a1a1a, #2c3e50);
             color: white;
             min-height: 100vh;
             padding: 20px;
+            line-height: 1.6;
         }
         
         .container {
@@ -26,11 +27,11 @@
         
         header {
             text-align: center;
-            padding: 30px 0;
+            padding: 40px 0;
         }
         
         h1 {
-            font-size: 2.5em;
+            font-size: 2.2em;
             margin-bottom: 10px;
             background: linear-gradient(45deg, #3498db, #2ecc71);
             -webkit-background-clip: text;
@@ -42,101 +43,79 @@
             border-radius: 20px;
             padding: 25px;
             margin: 20px 0;
-            backdrop-filter: blur(10px);
             border: 1px solid rgba(255,255,255,0.2);
         }
         
-        .feature-grid {
+        .step {
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #3498db;
+        }
+        
+        .step-number {
+            background: #3498db;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .bookmarklet-drag {
+            display: block;
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-decoration: none;
+            text-align: center;
+            font-size: 1.3em;
+            font-weight: bold;
+            margin: 20px 0;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .copy-box {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 1px solid #444;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            word-break: break-all;
+        }
+        
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin: 5px;
+            width: 100%;
+        }
+        
+        .feature-list {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            gap: 10px;
             margin: 20px 0;
         }
         
         .feature {
             background: rgba(52, 152, 219, 0.2);
             padding: 15px;
-            border-radius: 12px;
-            text-align: center;
+            border-radius: 10px;
             border: 1px solid rgba(52, 152, 219, 0.4);
-        }
-        
-        .big-button {
-            display: block;
-            width: 100%;
-            background: linear-gradient(45deg, #3498db, #2980b9);
-            color: white;
-            border: none;
-            padding: 20px;
-            border-radius: 15px;
-            font-size: 1.2em;
-            font-weight: bold;
-            margin: 10px 0;
-            cursor: pointer;
-            text-decoration: none;
-            text-align: center;
-            transition: transform 0.2s;
-        }
-        
-        .big-button:hover {
-            transform: translateY(-2px);
-        }
-        
-        .big-button.secondary {
-            background: linear-gradient(45deg, #2ecc71, #27ae60);
-        }
-        
-        .big-button.tertiary {
-            background: linear-gradient(45deg, #e74c3c, #c0392b);
-        }
-        
-        .instruction {
-            background: rgba(255,255,255,0.05);
-            padding: 20px;
-            border-radius: 12px;
-            margin: 15px 0;
-            border-left: 4px solid #3498db;
-        }
-        
-        .step {
-            display: flex;
-            align-items: center;
-            margin: 15px 0;
-            padding: 15px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 10px;
-        }
-        
-        .step-number {
-            background: #3498db;
-            color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            margin-right: 15px;
-            flex-shrink: 0;
-        }
-        
-        .quick-actions {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin: 15px 0;
-        }
-        
-        .quick-button {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            text-decoration: none;
-            text-align: center;
-            font-size: 0.9em;
         }
     </style>
 </head>
@@ -144,220 +123,106 @@
     <div class="container">
         <header>
             <h1>🎬 Streaming Enhancer</h1>
-            <p>Für iPad & Beamer - Einfach und schnell</p>
+            <p>Für iPad - Einmal einrichten, überall nutzen</p>
         </header>
         
         <div class="card">
-            <h2>✨ Enhanced Features</h2>
-            <div class="feature-grid">
-                <div class="feature">
-                    <h3>🚫 Keine Werbung</h3>
-                    <p>Automatischer Werbeblocker</p>
-                </div>
-                <div class="feature">
-                    <h3>⏭️ Intro Skip</h3>
-                    <p>Intros überspringen</p>
-                </div>
-                <div class="feature">
-                    <h3>▶️ Autoplay</h3>
-                    <p>Nächste Folgen</p>
-                </div>
-                <div class="feature">
-                    <h3>🛡️ Sicher</h3>
-                    <p>Keine Popups</p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="card">
-            <h2>🚀 Schnellstart</h2>
+            <h2>📋 So einfach geht's:</h2>
             
             <div class="step">
                 <div class="step-number">1</div>
-                <div>
-                    <strong>Streaming-Seite öffnen</strong>
-                    <p>Wähle eine Seite aus:</p>
+                <strong>Bookmarklet erstellen</strong>
+                <p style="margin-top: 10px;">Ziehe diesen Button in deine Lesezeichen-Leiste:</p>
+                
+                <a href="javascript:(function(){var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/gh/OpenUserJS/OpenUserJS.org/data/userscripts/Strencher_-_My_Anime_List_Enhancer.user.js';document.head.appendChild(s);})();" 
+                   class="bookmarklet-drag" id="dragButton">
+                    🎬 Drag to Bookmarks
+                </a>
+                
+                <p><em>Oder kopiere diesen Code und erstelle ein Lesezeichen:</em></p>
+                <div class="copy-box" id="bookmarkletCode">
+                    javascript:(function(){var script=document.createElement('script');script.src='https://your-render-url.onrender.com/enhancer.js';document.head.appendChild(script);})();
                 </div>
+                <button onclick="copyBookmarklet()">📋 Code kopieren</button>
             </div>
-            
-            <a href="https://aniworld.to" target="_blank" class="big-button">
-                📺 Aniworld öffnen
-            </a>
-            
-            <a href="https://s.to" target="_blank" class="big-button secondary">
-                🎬 s.to öffnen
-            </a>
-            
-            <a href="https://lookmovies.io" target="_blank" class="big-button tertiary">
-                🍿 LookMovies öffnen
-            </a>
             
             <div class="step">
                 <div class="step-number">2</div>
-                <div>
-                    <strong>Enhancer aktivieren</strong>
-                    <p>Lade das Enhancement-Script:</p>
-                </div>
+                <strong>Streaming-Seite öffnen</strong>
+                <p style="margin-top: 10px;">Öffne eine normale Streaming-Seite:</p>
+                <button onclick="window.open('https://aniworld.to')">📺 Aniworld öffnen</button>
+                <button onclick="window.open('https://s.to')">🎬 s.to öffnen</button>
+                <button onclick="window.open('https://lookmovies.io')">🍿 LookMovies öffnen</button>
             </div>
             
-            <button onclick="loadEnhancer()" class="big-button" style="background: linear-gradient(45deg, #9b59b6, #8e44ad);">
-                🎉 ENHANCER AKTIVIEREN
-            </button>
-            
-            <div class="instruction">
-                <p><strong>💡 Tipp:</strong> Aktiviere den Enhancer <em>nachdem</em> die Streaming-Seite vollständig geladen ist.</p>
+            <div class="step">
+                <div class="step-number">3</div>
+                <strong>Enhancer aktivieren</strong>
+                <p style="margin-top: 10px;">Klicke auf das "🎬 Drag to Bookmarks" Lesezeichen in deiner Lesezeichen-Leiste.</p>
+                <p><em>Das Control-Panel erscheint auf der aktuellen Seite!</em></p>
             </div>
         </div>
         
         <div class="card">
-            <h2>⚡ Quick Actions</h2>
-            <div class="quick-actions">
-                <button onclick="skipIntro()" class="quick-button">⏭️ Intro skip</button>
-                <button onclick="blockAds()" class="quick-button">🚫 Werbung blocken</button>
-                <button onclick="nextEpisode()" class="quick-button">▶️ Nächste Folge</button>
-                <button onclick="togglePanel()" class="quick-button">🎛️ Panel an/aus</button>
+            <h2>✨ Features</h2>
+            <div class="feature-list">
+                <div class="feature">
+                    <strong>🚫 Smart Ad-Block</strong>
+                    <p>Blockiert Werbung ohne ständige Benachrichtigungen</p>
+                </div>
+                <div class="feature">
+                    <strong>⏭️ Intro Skip</strong>
+                    <p>Überspringe Intros mit einem Klick</p>
+                </div>
+                <div class="feature">
+                    <strong>▶️ Auto Next</strong>
+                    <p>Automatisch nächste Folgen</p>
+                </div>
+                <div class="feature">
+                    <strong>🛡️ Popup-Blocker</strong>
+                    <p>Keine unerwünschten Weiterleitungen</p>
+                </div>
             </div>
+        </div>
+        
+        <div class="card">
+            <h2>🔧 Für Render</h2>
+            <p>Ersetze in den Code-Beispielen:</p>
+            <div class="copy-box">
+                https://your-render-url.onrender.com
+            </div>
+            <p>...mit deiner echten Render-URL!</p>
         </div>
     </div>
 
     <script>
-        // Enhanced Streaming Script
-        function loadEnhancer() {
-            // Erstelle Control Panel
-            const panel = document.createElement('div');
-            panel.id = 'enhancer-panel';
-            panel.innerHTML = `
-                <div style="
-                    position: fixed;
-                    bottom: 20px;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    background: rgba(0,0,0,0.95);
-                    color: white;
-                    padding: 15px;
-                    border-radius: 15px;
-                    z-index: 10000;
-                    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-                    border: 2px solid #3498db;
-                    min-width: 300px;
-                    text-align: center;
-                    backdrop-filter: blur(10px);
-                ">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <strong style="color: #3498db;">🎬 Enhanced Active</strong>
-                        <button onclick="this.parentElement.parentElement.parentElement.remove()" 
-                            style="background: none; border: none; color: white; cursor: pointer; font-size: 18px; padding: 5px;">×</button>
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                        <button onclick="window.enhancerSkipIntro()" style="background: #e74c3c; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer;">⏭️ Intro</button>
-                        <button onclick="window.enhancerNextEpisode()" style="background: #2ecc71; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer;">▶️ Next</button>
-                        <button onclick="window.enhancerBlockAds()" style="background: #f39c12; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer;">🚫 Ads</button>
-                        <button onclick="window.enhancerToggleAutoplay()" style="background: #3498db; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer;">🔁 Auto</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(panel);
-            
-            // Erstelle Enhancer Script
-            const script = document.createElement('script');
-            script.innerHTML = `
-                // Enhanced Streaming Functions
-                window.enhancerSkipIntro = function() {
-                    const video = document.querySelector('video');
-                    if (video) {
-                        video.currentTime = Math.min(90, video.duration - 10);
-                        alert('✅ Intro übersprungen!');
-                    } else {
-                        alert('❌ Kein Video gefunden');
-                    }
-                };
-                
-                window.enhancerNextEpisode = function() {
-                    const nextSelectors = [
-                        'a[href*="next"]',
-                        'button',
-                        'a',
-                        '[class*="next"]',
-                        '[class*="weiter"]'
-                    ];
-                    
-                    for (let selector of nextSelectors) {
-                        const elements = document.querySelectorAll(selector);
-                        for (let el of elements) {
-                            const text = el.textContent.toLowerCase();
-                            if (text.includes('next') || text.includes('weiter') || text.includes('continue')) {
-                                el.click();
-                                return;
-                            }
-                        }
-                    }
-                    alert('❌ Nächste Folge nicht gefunden');
-                };
-                
-                window.enhancerBlockAds = function() {
-                    const ads = document.querySelectorAll([
-                        '[class*="ad"]',
-                        '[id*="ad"]',
-                        '.ad',
-                        '.ads',
-                        '.advertisement',
-                        '[class*="banner"]',
-                        'iframe[src*="ads"]'
-                    ].join(','));
-                    
-                    ads.forEach(ad => {
-                        ad.style.display = 'none';
-                        ad.remove();
-                    });
-                    
-                    // Popup Blocker
-                    window.open = function() { return null; };
-                    
-                    alert('✅ Werbung geblockt!');
-                };
-                
-                window.enhancerToggleAutoplay = function() {
-                    const video = document.querySelector('video');
-                    if (video) {
-                        video.addEventListener('ended', function() {
-                            setTimeout(() => window.enhancerNextEpisode(), 2000);
-                        });
-                        alert('✅ Autoplay aktiviert!');
-                    } else {
-                        alert('❌ Kein Video für Autoplay');
-                    }
-                };
-                
-                // Auto Ad Block
-                setInterval(window.enhancerBlockAds, 3000);
-                console.log('🎬 Enhanced Streaming aktiviert!');
-            `;
-            document.head.appendChild(script);
-            
-            alert('🎉 Enhanced Streaming aktiviert! Das Panel erscheint unten.');
+        // Aktuelle URL für Bookmarklet setzen
+        const currentUrl = window.location.origin;
+        
+        // Bookmarklet Code aktualisieren
+        const bookmarkletCode = `javascript:(function(){var script=document.createElement('script');script.src='${currentUrl}/enhancer.js';document.head.appendChild(script);})();`;
+        
+        document.getElementById('bookmarkletCode').textContent = bookmarkletCode;
+        document.getElementById('dragButton').href = bookmarkletCode;
+
+        function copyBookmarklet() {
+            const code = document.getElementById('bookmarkletCode').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code kopiert! Erstelle jetzt ein Lesezeichen mit dieser URL.');
+            });
         }
         
-        // Quick Actions für die Hauptseite
-        function skipIntro() {
-            alert('Öffne erst eine Streaming-Seite und aktiviere den Enhancer!');
-        }
+        // Bookmarklet Drag Feedback
+        const dragButton = document.getElementById('dragButton');
+        dragButton.addEventListener('dragstart', function(e) {
+            e.dataTransfer.setData('text/uri-list', this.href);
+            e.dataTransfer.setData('text/plain', this.href);
+            this.style.opacity = '0.5';
+        });
         
-        function blockAds() {
-            alert('Öffne erst eine Streaming-Seite und aktiviere den Enhancer!');
-        }
-        
-        function nextEpisode() {
-            alert('Öffne erst eine Streaming-Seite und aktiviere den Enhancer!');
-        }
-        
-        function togglePanel() {
-            const panel = document.getElementById('enhancer-panel');
-            if (panel) {
-                panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-            } else {
-                alert('Aktiviere zuerst den Enhancer!');
-            }
-        }
+        dragButton.addEventListener('dragend', function() {
+            this.style.opacity = '1';
+        });
     </script>
 </body>
 </html>
