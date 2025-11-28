@@ -20,9 +20,10 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--background-color);
+            background: linear-gradient(135deg, #1a1a1a 0%, #2c3e50 100%);
             color: var(--text-color);
             line-height: 1.6;
+            min-height: 100vh;
         }
         
         .container {
@@ -32,185 +33,238 @@
         }
         
         header {
-            background-color: var(--primary-color);
-            padding: 1rem 0;
+            text-align: center;
+            padding: 2rem 0;
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
             margin-bottom: 2rem;
-            border-bottom: 3px solid var(--secondary-color);
         }
         
         header h1 {
-            text-align: center;
-            font-size: 2.5rem;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         
         .description {
-            background-color: #2c2c2c;
-            padding: 20px;
-            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            padding: 25px;
+            border-radius: 12px;
             margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
         }
         
         .features {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
-            margin: 20px 0;
+            margin: 25px 0;
         }
         
         .feature {
-            background-color: #34495e;
-            padding: 15px;
-            border-radius: 5px;
+            background: rgba(52, 152, 219, 0.2);
+            padding: 20px;
+            border-radius: 10px;
             text-align: center;
+            border: 1px solid rgba(52, 152, 219, 0.3);
+            transition: transform 0.3s ease;
+        }
+        
+        .feature:hover {
+            transform: translateY(-5px);
         }
         
         .services {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
             margin-bottom: 2rem;
         }
         
         .service-card {
-            background-color: #2c2c2c;
-            border-radius: 8px;
-            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 30px;
             text-align: center;
-            transition: transform 0.3s, box-shadow 0.3s;
+            transition: all 0.3s ease;
             cursor: pointer;
-            border: 1px solid #444;
+            border: 2px solid transparent;
             text-decoration: none;
             color: inherit;
             display: block;
+            backdrop-filter: blur(10px);
         }
         
         .service-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-            border-color: var(--secondary-color);
+            transform: translateY(-8px);
+            border-color: #3498db;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            background: rgba(255,255,255,0.1);
         }
         
         .service-card h3 {
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             color: var(--secondary-color);
+            font-size: 1.5rem;
         }
         
         .custom-url {
-            background-color: #2c2c2c;
-            border-radius: 8px;
-            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 30px;
             margin-top: 2rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
         }
         
         .url-input {
             display: flex;
-            gap: 10px;
-            margin-top: 10px;
+            gap: 12px;
+            margin-top: 15px;
         }
         
         .url-input input {
             flex: 1;
-            padding: 10px;
-            border-radius: 4px;
+            padding: 12px 16px;
+            border-radius: 8px;
             border: 1px solid #444;
-            background-color: #1a1a1a;
+            background: rgba(0,0,0,0.3);
             color: white;
+            font-size: 16px;
+        }
+        
+        .url-input input:focus {
+            outline: none;
+            border-color: #3498db;
         }
         
         button {
-            background-color: var(--secondary-color);
+            background: linear-gradient(45deg, #3498db, #2980b9);
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
+            padding: 12px 24px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            font-weight: 600;
         }
         
         button:hover {
-            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(46, 204, 113, 0.2);
+            border-radius: 8px;
+            border-left: 4px solid #2ecc71;
         }
         
         @media (max-width: 768px) {
             .services {
                 grid-template-columns: 1fr;
             }
+            
+            .url-input {
+                flex-direction: column;
+            }
+            
+            header h1 {
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="container">
-            <h1>Enhanced Streaming Hub</h1>
-        </div>
-    </header>
-    
     <div class="container">
+        <header>
+            <h1>🎬 Enhanced Streaming Hub</h1>
+            <p>Deine Streaming-Seiten mit erweiterten Funktionen - ohne Designänderungen!</p>
+        </header>
+        
         <div class="description">
-            <h2>Verbessertes Streaming-Erlebnis</h2>
-            <p>Öffne deine Lieblings-Streaming-Seiten mit erweiterten Funktionen:</p>
+            <h2>✨ Verbessertes Streaming-Erlebnis</h2>
+            <p>Öffne deine Lieblings-Streaming-Seiten mit zusätzlichen Funktionen. Das originale Design und alle Funktionen bleiben erhalten!</p>
             
             <div class="features">
                 <div class="feature">
                     <h3>🚫 Keine Werbung</h3>
-                    <p>Automatisches Blockieren von Werbeanzeigen</p>
+                    <p>Werbung wird automatisch blockiert</p>
                 </div>
                 <div class="feature">
                     <h3>▶️ Autoplay</h3>
-                    <p>Automatisch nächste Folgen abspielen</p>
+                    <p>Nächste Folgen automatisch abspielen</p>
                 </div>
                 <div class="feature">
                     <h3>⏭️ Intro Skip</h3>
-                    <p>Intros automatisch überspringen</p>
+                    <p>Intros überspringen mit einem Klick</p>
                 </div>
                 <div class="feature">
                     <h3>🛡️ Sicher</h3>
-                    <p>Blockiert unerwünschte Weiterleitungen</p>
+                    <p>Unerwünschte Weiterleitungen blockiert</p>
                 </div>
             </div>
         </div>
         
-        <h2>Streaming-Dienste</h2>
+        <h2 style="text-align: center; margin-bottom: 20px;">📺 Streaming-Dienste</h2>
         <div class="services">
-            <a href="/proxy/https://aniworld.to" class="service-card" target="_blank">
+            <a href="/proxy/https://aniworld.to" class="service-card">
                 <h3>Aniworld</h3>
                 <p>Anime und asiatische Serien</p>
-                <small>Mit erweiterten Funktionen öffnen</small>
+                <small>Mit Enhanced Features öffnen</small>
             </a>
             
-            <a href="/proxy/https://s.to" class="service-card" target="_blank">
+            <a href="/proxy/https://s.to" class="service-card">
                 <h3>s.to</h3>
                 <p>Filme und Serien</p>
-                <small>Mit erweiterten Funktionen öffnen</small>
+                <small>Mit Enhanced Features öffnen</small>
             </a>
             
-            <a href="/proxy/https://lookmovies.org" class="service-card" target="_blank">
+            <a href="/proxy/https://lookmovies.io" class="service-card">
                 <h3>LookMovies</h3>
                 <p>Internationale Filme und Serien</p>
-                <small>Mit erweiterten Funktionen öffnen</small>
+                <small>Mit Enhanced Features öffnen</small>
             </a>
         </div>
         
         <div class="custom-url">
-            <h2>Eigene URL öffnen</h2>
-            <p>Öffne jede Streaming-Seite mit den erweiterten Funktionen:</p>
+            <h2>🌐 Eigene Streaming-Seite öffnen</h2>
+            <p>Gib die URL einer beliebigen Streaming-Seite ein:</p>
             <div class="url-input">
-                <input type="text" id="customUrl" placeholder="https://deine-streaming-seite.com">
-                <button onclick="openCustomUrl()">Öffnen</button>
+                <input type="text" id="customUrl" placeholder="https://deine-streaming-seite.com" value="https://">
+                <button onclick="openCustomUrl()">Mit Enhanced Features öffnen</button>
+            </div>
+            <div class="instructions">
+                <strong>💡 Tipp:</strong> Die Seite öffnet sich in einem neuen Tab mit allen Enhanced Features. 
+                Das originale Design und alle Funktionen bleiben erhalten!
             </div>
         </div>
     </div>
 
     <script>
         function openCustomUrl() {
-            const url = document.getElementById('customUrl').value;
-            if (url) {
-                // URL kodieren für Proxy
-                const encodedUrl = encodeURIComponent(url);
-                window.open(`/proxy/${encodedUrl}`, '_blank');
-            } else {
-                alert('Bitte eine URL eingeben');
+            const urlInput = document.getElementById('customUrl');
+            let url = urlInput.value.trim();
+            
+            if (!url || url === 'https://') {
+                alert('Bitte gib eine gültige URL ein');
+                return;
             }
+            
+            // URL validieren
+            if (!url.startsWith('http')) {
+                url = 'https://' + url;
+            }
+            
+            // URL kodieren für Proxy
+            const encodedUrl = encodeURIComponent(url);
+            window.open(`/proxy/${encodedUrl}`, '_blank');
         }
         
         // Enter-Taste für URL Input
@@ -219,6 +273,9 @@
                 openCustomUrl();
             }
         });
+        
+        // Fokus auf URL Input
+        document.getElementById('customUrl').focus();
     </script>
 </body>
 </html>
