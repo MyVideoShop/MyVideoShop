@@ -19,9 +19,14 @@
             this.setupAutoplay();
             this.setupRedirectProtection();
             this.setupIntroSkip();
+            this.showSuccessMessage();
         },
         
         createControlPanel() {
+            // Altes Panel entfernen falls vorhanden
+            const oldPanel = document.getElementById('enhanced-streaming-panel');
+            if (oldPanel) oldPanel.remove();
+            
             // Control Panel erstellen
             const panel = document.createElement('div');
             panel.id = 'enhanced-streaming-panel';
@@ -42,7 +47,7 @@
                     backdrop-filter: blur(10px);
                     box-shadow: 0 5px 25px rgba(0,0,0,0.5);
                 ">
-                    <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                         <strong style="color: #3498db; font-size: 16px;">🎬 Enhanced Streaming</strong>
                         <button onclick="this.parentElement.parentElement.parentElement.style.display='none'" 
                             style="background: none; border: none; color: white; cursor: pointer; font-size: 18px; margin-left: 10px;">×</button>
@@ -83,7 +88,9 @@
                 '.ads',
                 '.advert',
                 'iframe[src*="ads"]',
-                'iframe[src*="doubleclick"]'
+                'iframe[src*="doubleclick"]',
+                '[class*="popup"]',
+                '[id*="popup"]'
             ];
             
             const removeAds = () => {
@@ -92,6 +99,7 @@
                         document.querySelectorAll(selector).forEach(el => {
                             if (el && el.parentNode) {
                                 el.style.display = 'none';
+                                el.style.visibility = 'hidden';
                             }
                         });
                     } catch (e) {}
@@ -110,20 +118,20 @@
                     height: 0 !important;
                     width: 0 !important;
                     opacity: 0 !important;
+                    position: absolute !important;
                 }
             `;
             document.head.appendChild(style);
         },
         
         setupAutoplay() {
-            if (!this.autoplayEnabled) return;
-            
             const setupVideoListener = () => {
                 document.querySelectorAll('video').forEach(video => {
                     if (!video.dataset.enhancedAutoplay) {
                         video.dataset.enhancedAutoplay = 'true';
                         video.addEventListener('ended', () => {
                             if (this.autoplayEnabled) {
+                                console.log('Video ended - trying next episode...');
                                 setTimeout(() => this.nextEpisode(), 3000);
                             }
                         });
@@ -137,31 +145,35 @@
         
         setupRedirectProtection() {
             // Popups blockieren
-            window.open = function() { return null; };
+            const originalOpen = window.open;
+            window.open = function() { 
+                console.log('Popup blocked by Enhanced Streaming');
+                return null; 
+            };
             
             // Unerwünschte Klicks blockieren
             document.addEventListener('click', (e) => {
                 const link = e.target.closest('a');
                 if (link && link.href) {
                     const href = link.href.toLowerCase();
-                    if (href.includes('popup') || href.includes('redirect') || href.includes('ads')) {
+                    if (href.includes('popup') || href.includes('redirect') || href.includes('ads') || href.includes('banner')) {
                         e.preventDefault();
                         e.stopPropagation();
+                        console.log('Blocked suspicious link:', href);
                     }
                 }
             }, true);
         },
         
         setupIntroSkip() {
-            if (!this.skipIntroEnabled) return;
-            
             setInterval(() => {
+                if (!this.skipIntroEnabled) return;
+                
                 const video = document.querySelector('video');
-                if (video && video.currentTime < 90) {
-                    // Automatisch Intro überspringen nach 10 Sekunden
-                    if (video.currentTime > 10 && video.currentTime < 85) {
-                        video.currentTime = 90;
-                    }
+                if (video && video.currentTime < 90 && video.currentTime > 10) {
+                    // Automatisch Intro überspringen
+                    video.currentTime = 90;
+                    console.log('Intro automatically skipped');
                 }
             }, 5000);
         },
@@ -169,43 +181,88 @@
         toggleAutoplay(enabled) {
             this.autoplayEnabled = enabled;
             localStorage.setItem('enhancedAutoplay', enabled);
+            console.log('Autoplay:', enabled ? 'ON' : 'OFF');
         },
         
         toggleIntroSkip(enabled) {
             this.skipIntroEnabled = enabled;
             localStorage.setItem('enhancedIntroSkip', enabled);
+            console.log('Intro Skip:', enabled ? 'ON' : 'OFF');
         },
         
         skipIntroNow() {
             const video = document.querySelector('video');
             if (video) {
                 video.currentTime = Math.min(90, video.duration - 60);
+                console.log('Intro skipped manually');
             }
         },
         
         nextEpisode() {
             // Versuche nächste Folge zu finden
-            const nextButtons = [
+            const nextSelectors = [
                 'a[href*="next"]',
-                'button:contains("Next")',
-                'a:contains("Next")',
-                'button:contains("Weiter")',
-                'a:contains("Weiter")',
-                '.next-episode',
-                '.next'
+                'button',
+                'a',
+                '[class*="next"]',
+                '[class*="weiter"]',
+                '[class*="continue"]'
             ];
             
-            for (let selector of nextButtons) {
+            for (let selector of nextSelectors) {
                 try {
-                    const element = document.querySelector(selector);
-                    if (element && element.offsetParent !== null) {
-                        element.click();
-                        return;
+                    const elements = document.querySelectorAll(selector);
+                    for (let el of elements) {
+                        const text = el.textContent.toLowerCase();
+                        if ((text.includes('next') || text.includes('weiter') || text.includes('continue')) && 
+                            el.offsetParent !== null) {
+                            console.log('Found next button:', el);
+                            el.click();
+                            return true;
+                        }
                     }
                 } catch (e) {}
             }
             
-            alert('Nächste Folge konnte nicht automatisch gefunden werden.');
+            console.log('No next episode button found');
+            return false;
+        },
+        
+        showSuccessMessage() {
+            // Erfolgsmeldung anzeigen
+            const message = document.createElement('div');
+            message.innerHTML = `
+                <div style="
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: rgba(46, 204, 113, 0.95);
+                    color: white;
+                    padding: 20px;
+                    border-radius: 10px;
+                    z-index: 10001;
+                    font-family: Arial, sans-serif;
+                    text-align: center;
+                    border: 2px solid #27ae60;
+                    box-shadow: 0 5px 25px rgba(0,0,0,0.5);
+                ">
+                    <h3>🎉 Enhanced Streaming aktiviert!</h3>
+                    <p>Werbeblocker, Autoplay und Intro-Skip sind jetzt aktiv.</p>
+                    <button onclick="this.parentElement.parentElement.remove()" 
+                        style="background: #27ae60; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; margin-top: 10px;">
+                        OK
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(message);
+            
+            // Nach 5 Sekunden automatisch entfernen
+            setTimeout(() => {
+                if (message.parentElement) {
+                    message.remove();
+                }
+            }, 5000);
         }
     };
     
@@ -216,7 +273,7 @@
     // Global verfügbar machen
     window.enhancedStreaming = enhancedStreaming;
     
-    // Initialisieren wenn Seite geladen
+    // Initialisieren
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => enhancedStreaming.init());
     } else {
