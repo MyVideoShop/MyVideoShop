@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Streaming Hub</title>
+    <title>Enhanced Streaming Hub</title>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -43,6 +43,27 @@
             font-size: 2.5rem;
         }
         
+        .description {
+            background-color: #2c2c2c;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .feature {
+            background-color: #34495e;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
         .services {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -58,11 +79,15 @@
             transition: transform 0.3s, box-shadow 0.3s;
             cursor: pointer;
             border: 1px solid #444;
+            text-decoration: none;
+            color: inherit;
+            display: block;
         }
         
         .service-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            border-color: var(--secondary-color);
         }
         
         .service-card h3 {
@@ -70,32 +95,33 @@
             color: var(--secondary-color);
         }
         
-        .player-container {
+        .custom-url {
             background-color: #2c2c2c;
             border-radius: 8px;
             padding: 20px;
             margin-top: 2rem;
-            display: none;
         }
         
-        .player-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
-        .controls {
+        .url-input {
             display: flex;
             gap: 10px;
-            margin-bottom: 15px;
+            margin-top: 10px;
+        }
+        
+        .url-input input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #444;
+            background-color: #1a1a1a;
+            color: white;
         }
         
         button {
             background-color: var(--secondary-color);
             color: white;
             border: none;
-            padding: 8px 15px;
+            padding: 10px 20px;
             border-radius: 4px;
             cursor: pointer;
             transition: background-color 0.3s;
@@ -105,20 +131,9 @@
             background-color: #2980b9;
         }
         
-        iframe {
-            width: 100%;
-            height: 500px;
-            border: none;
-            border-radius: 4px;
-        }
-        
         @media (max-width: 768px) {
             .services {
                 grid-template-columns: 1fr;
-            }
-            
-            iframe {
-                height: 300px;
             }
         }
     </style>
@@ -126,119 +141,83 @@
 <body>
     <header>
         <div class="container">
-            <h1>Streaming Hub</h1>
+            <h1>Enhanced Streaming Hub</h1>
         </div>
     </header>
     
     <div class="container">
-        <div class="services">
-            <div class="service-card" data-service="aniworld">
-                <h3>Aniworld</h3>
-                <p>Anime und asiatische Serien</p>
-            </div>
-            <div class="service-card" data-service="sto">
-                <h3>s.to</h3>
-                <p>Filme und Serien</p>
-            </div>
-            <div class="service-card" data-service="lookmovies">
-                <h3>LookMovies</h3>
-                <p>Internationale Filme und Serien</p>
+        <div class="description">
+            <h2>Verbessertes Streaming-Erlebnis</h2>
+            <p>Öffne deine Lieblings-Streaming-Seiten mit erweiterten Funktionen:</p>
+            
+            <div class="features">
+                <div class="feature">
+                    <h3>🚫 Keine Werbung</h3>
+                    <p>Automatisches Blockieren von Werbeanzeigen</p>
+                </div>
+                <div class="feature">
+                    <h3>▶️ Autoplay</h3>
+                    <p>Automatisch nächste Folgen abspielen</p>
+                </div>
+                <div class="feature">
+                    <h3>⏭️ Intro Skip</h3>
+                    <p>Intros automatisch überspringen</p>
+                </div>
+                <div class="feature">
+                    <h3>🛡️ Sicher</h3>
+                    <p>Blockiert unerwünschte Weiterleitungen</p>
+                </div>
             </div>
         </div>
         
-        <div class="player-container" id="playerContainer">
-            <div class="player-header">
-                <h2 id="playerTitle">Streaming Player</h2>
-                <button id="closePlayer">Schließen</button>
-            </div>
+        <h2>Streaming-Dienste</h2>
+        <div class="services">
+            <a href="/proxy/https://aniworld.to" class="service-card" target="_blank">
+                <h3>Aniworld</h3>
+                <p>Anime und asiatische Serien</p>
+                <small>Mit erweiterten Funktionen öffnen</small>
+            </a>
             
-            <div class="controls">
-                <button id="prevEpisode">Vorherige Folge</button>
-                <button id="nextEpisode">Nächste Folge</button>
-                <button id="skipIntro">Intro überspringen</button>
-                <button id="toggleAutoplay">Autoplay: Aus</button>
-            </div>
+            <a href="/proxy/https://s.to" class="service-card" target="_blank">
+                <h3>s.to</h3>
+                <p>Filme und Serien</p>
+                <small>Mit erweiterten Funktionen öffnen</small>
+            </a>
             
-            <div id="videoContainer">
-                <!-- Hier wird der Video-Player eingebettet -->
-                <iframe id="videoPlayer" src="" allowfullscreen></iframe>
+            <a href="/proxy/https://lookmovies.org" class="service-card" target="_blank">
+                <h3>LookMovies</h3>
+                <p>Internationale Filme und Serien</p>
+                <small>Mit erweiterten Funktionen öffnen</small>
+            </a>
+        </div>
+        
+        <div class="custom-url">
+            <h2>Eigene URL öffnen</h2>
+            <p>Öffne jede Streaming-Seite mit den erweiterten Funktionen:</p>
+            <div class="url-input">
+                <input type="text" id="customUrl" placeholder="https://deine-streaming-seite.com">
+                <button onclick="openCustomUrl()">Öffnen</button>
             </div>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const serviceCards = document.querySelectorAll('.service-card');
-            const playerContainer = document.getElementById('playerContainer');
-            const videoPlayer = document.getElementById('videoPlayer');
-            const closePlayerBtn = document.getElementById('closePlayer');
-            const prevEpisodeBtn = document.getElementById('prevEpisode');
-            const nextEpisodeBtn = document.getElementById('nextEpisode');
-            const skipIntroBtn = document.getElementById('skipIntro');
-            const toggleAutoplayBtn = document.getElementById('toggleAutoplay');
-            const playerTitle = document.getElementById('playerTitle');
-            
-            let currentService = '';
-            let autoplayEnabled = false;
-            let currentEpisode = 1;
-            
-            // Service-Karten Event-Listener
-            serviceCards.forEach(card => {
-                card.addEventListener('click', function() {
-                    currentService = this.getAttribute('data-service');
-                    playerTitle.textContent = `${currentService} - Player`;
-                    playerContainer.style.display = 'block';
-                    
-                    // Hier würde normalerweise der Video-Player geladen werden
-                    // Für dieses Beispiel zeigen wir eine Platzhalter-URL
-                    videoPlayer.src = `about:blank`;
-                    
-                    // Scroll zum Player
-                    playerContainer.scrollIntoView({ behavior: 'smooth' });
-                });
-            });
-            
-            // Player-Steuerung
-            closePlayerBtn.addEventListener('click', function() {
-                playerContainer.style.display = 'none';
-                videoPlayer.src = '';
-            });
-            
-            prevEpisodeBtn.addEventListener('click', function() {
-                if (currentEpisode > 1) {
-                    currentEpisode--;
-                    loadEpisode(currentEpisode);
-                }
-            });
-            
-            nextEpisodeBtn.addEventListener('click', function() {
-                currentEpisode++;
-                loadEpisode(currentEpisode);
-            });
-            
-            skipIntroBtn.addEventListener('click', function() {
-                // Intro überspringen - würde normalerweise die aktuelle Zeit des Videos setzen
-                alert('Intro würde übersprungen werden');
-            });
-            
-            toggleAutoplayBtn.addEventListener('click', function() {
-                autoplayEnabled = !autoplayEnabled;
-                this.textContent = `Autoplay: ${autoplayEnabled ? 'An' : 'Aus'}`;
-            });
-            
-            function loadEpisode(episode) {
-                // Hier würde die entsprechende Episode geladen werden
-                console.log(`Lade Episode ${episode} von ${currentService}`);
-                // In einer echten Implementierung würde hier die Video-URL geändert werden
+        function openCustomUrl() {
+            const url = document.getElementById('customUrl').value;
+            if (url) {
+                // URL kodieren für Proxy
+                const encodedUrl = encodeURIComponent(url);
+                window.open(`/proxy/${encodedUrl}`, '_blank');
+            } else {
+                alert('Bitte eine URL eingeben');
             }
-            
-            // Automatisches Laden der nächsten Folge, wenn Autoplay aktiviert ist
-            videoPlayer.addEventListener('ended', function() {
-                if (autoplayEnabled) {
-                    currentEpisode++;
-                    loadEpisode(currentEpisode);
-                }
-            });
+        }
+        
+        // Enter-Taste für URL Input
+        document.getElementById('customUrl').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                openCustomUrl();
+            }
         });
     </script>
 </body>
