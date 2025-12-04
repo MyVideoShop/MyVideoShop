@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: bot-service
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: PORT
+        value: 5000
+      - key: SECRET_KEY
+        generateValue: true
+      - key: HEADLESS
+        value: "true"
+      - key: LOGIN_URL
+        value: "https://deine-webseite.com/login"  # ANPASSEN
+      - key: BASE_URL
+        value: "https://deine-webseite.com"  # ANPASSEN
+      - key: RUN_TIME
+        value: "09:00"
