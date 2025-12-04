@@ -1,0 +1,92 @@
+# Aufgaben-Definitionen
+# Hier können beliebig viele Aufgaben hinzugefügt werden
+
+tasks:
+  # Tägliche Belohnung abholen
+  daily_reward:
+    name: "Tägliche Belohnung"
+    description: "Holt die tägliche Login-Belohnung ab"
+    enabled: true
+    steps:
+      - action: "navigate"
+        url: "{{base_url}}/rewards"
+        wait: 3
+        
+      - action: "click"
+        selector: "button.daily-reward"
+        wait: 2
+        
+      - action: "screenshot"
+        filename: "daily_reward_{{date}}.png"
+        
+      - action: "log"
+        message: "Tägliche Belohnung abgeholt"
+  
+  # Nachrichten überprüfen
+  check_messages:
+    name: "Nachrichten prüfen"
+    description: "Überprüft auf neue Nachrichten"
+    enabled: true
+    steps:
+      - action: "navigate"
+        url: "{{base_url}}/messages"
+        wait: 3
+        
+      - action: "element_exists"
+        selector: ".new-message"
+        if_exists:
+          - action: "log"
+            message: "Neue Nachrichten gefunden"
+          - action: "click"
+            selector: ".new-message:first"
+            wait: 2
+        if_not_exists:
+          - action: "log"
+            message: "Keine neuen Nachrichten"
+  
+  # Profil aktualisieren
+  update_profile:
+    name: "Profil aktualisieren"
+    description: "Aktualisiert das Profil"
+    enabled: false  # Deaktiviert
+    steps:
+      - action: "navigate"
+        url: "{{base_url}}/profile"
+        wait: 2
+        
+      - action: "input"
+        selector: "#status-input"
+        value: "Automatisch aktualisiert um {{time}}"
+        
+      - action: "click"
+        selector: "button.save-profile"
+        wait: 2
+        
+      - action: "log"
+        message: "Profil aktualisiert"
+  
+  # Beispiel: Daten extrahieren
+  extract_data:
+    name: "Daten extrahieren"
+    description: "Extrahiert wichtige Daten von der Seite"
+    enabled: true
+    steps:
+      - action: "navigate"
+        url: "{{base_url}}/statistics"
+        wait: 5
+        
+      - action: "extract_text"
+        selector: ".stats-value"
+        variable_name: "stats"
+        save_to_file: true
+        filename: "statistics_{{date}}.txt"
+        
+      - action: "log"
+        message: "Daten extrahiert: {{stats}}"
+
+# Globale Einstellungen
+settings:
+  default_wait_time: 3
+  max_retries: 3
+  retry_delay: 2
+  take_screenshot_on_error: true
