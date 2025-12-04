@@ -1,0 +1,14 @@
+# Liste der Webseiten
+websites:
+  # Haupt-Webseite
+  main:
+    name: "Meine Webseite"
+    base_url: "https://example.com"
+    login_url: "https://example.com/login"
+    dashboard_url: "https://example.com/dashboard"
+    
+  # Weitere Webseiten können hier hinzugefügt werden
+  # secondary:
+  #   name: "Zweite Webseite"
+  #   base_url: "https://zweite-seite.com"
+  #   login_url: "https://zweite-seite.com/login"
